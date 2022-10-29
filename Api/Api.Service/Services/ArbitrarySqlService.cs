@@ -1,14 +1,7 @@
 ﻿using Dapper;
 using Data.Interfaces;
-using Data.Models;
-using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Tm.Data.Models;
 
-namespace Data
+namespace Api.Service.Services
 {
     public class ArbitrarySqlService : IArbitrarySqlService
     {
@@ -19,9 +12,9 @@ namespace Data
             _connectionFactory = connectionFactory;
         }
 
-        public dynamic Select(string connectionString, string sql, object param = null)
+        public dynamic Select(string connectionStringName, string sql, object? param = null)
         {
-            using (var con = _connectionFactory.Build(connectionString))
+            using (var connection = _connectionFactory.Build(connectionStringName))
             {
                 return con.Query(sql, param).ToList();
             }

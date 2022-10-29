@@ -1,10 +1,12 @@
-﻿using Data.Interfaces;
+﻿using Api.Service.Auth;
+using Data.Interfaces;
 using Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Tm.Data.Models;
 
 namespace Api.Service.Controllers
 {
+    [Route("api/arbitrarysql")]
     public class ArbitrarySqlController : Controller
     {
         private readonly IArbitrarySqlService _arbitrarySqlService;
@@ -14,10 +16,17 @@ namespace Api.Service.Controllers
             _arbitrarySqlService = arbitrarySqlService;
         }
 
+        [HttpGet("select")]
         public IActionResult Select(string sql, IList<SqlParameter> parameters)
         {
-            var connectionString = "";
-            var response = _arbitrarySqlService.Select(connectionString, sql);
+            if (!HttpContext.User.HasClaim(x => x.Type == TokenClaimTypes.ConnectionStringName))
+            {
+                return StatusCode(403);
+            }
+
+            var connectionStringName =
+                HttpContext.User.FindFirst(x => x.Type == TokenClaimTypes.ConnectionStringName)!.Value;
+            var response = _arbitrarySqlService.Select(connectionStringName, sql);
             var result = new SqlResult();
             foreach (var responseRow in response)
             {

@@ -6,6 +6,6 @@ namespace Data.Interfaces
 {
     public interface IArbitrarySqlService
     {
-        dynamic Select(string connectionString, string sql, object param = null);
+        dynamic Select(string connectionStringName, string sql, object param = null);
     }
 }

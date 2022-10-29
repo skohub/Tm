@@ -4,6 +4,6 @@ namespace Data.Interfaces
 {
     public interface IConnectionFactory
     {
-        DbConnection Build(string connectionString);
+        DbConnection Build(string connectionStringName);
     }
 }

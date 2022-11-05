@@ -5,9 +5,10 @@ using Tm.Data.Models;
 
 namespace Tm.Data.Interfaces
 {
-    public interface ISaleRepository
+    public interface ISalesReportsRepository
     {
         Task<IList<SalesSummary>> GetSaleSummaries(DateTime date);
         Task<IList<ProductsTotalAmount>> GetProductsTotalAmount(DateTime date);
+        Task<Dictionary<string, string>> GetMonthlySales(int year, int month);
     }
 }

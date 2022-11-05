@@ -8,17 +8,17 @@ public class SalesSummaryCommand : ICommand
 {
     private const string _lineBreak = "\r\n";
 
-    private readonly ISaleRepository _saleRepository;
+    private readonly ISalesReportsRepository _salesReportsRepository;
 
-    public SalesSummaryCommand(ISaleRepository saleRepository)
+    public SalesSummaryCommand(ISalesReportsRepository salesReportsRepository)
     {
-        _saleRepository = saleRepository;
+        _salesReportsRepository = salesReportsRepository;
     }
 
     public async Task<CommandResult> ExecuteAsync(string[] arguments, ITelegramBotClient client)
     {
         var date = DateTime.Today;
-        var sales = await _saleRepository.GetSaleSummaries(date);
+        var sales = await _salesReportsRepository.GetSaleSummaries(date);
         if (!sales.Any())
         {
             return new CommandResult { Text = "Сегодня продаж еще не было." };

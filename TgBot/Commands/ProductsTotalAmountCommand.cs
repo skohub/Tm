@@ -8,11 +8,11 @@ public class ProductsTotalAmountCommand : ICommand
 {
     private const string _lineBreak = "\r\n";
 
-    private readonly ISaleRepository _saleRepository;
+    private readonly ISalesReportsRepository _salesReportsRepository;
 
-    public ProductsTotalAmountCommand(ISaleRepository saleRepository)
+    public ProductsTotalAmountCommand(ISalesReportsRepository salesReportsRepository)
     {
-        _saleRepository = saleRepository;
+        _salesReportsRepository = salesReportsRepository;
     }
 
     public async Task<CommandResult> ExecuteAsync(string[] arguments, ITelegramBotClient client)
@@ -25,7 +25,7 @@ public class ProductsTotalAmountCommand : ICommand
         }
 
         var header = $"Остатки товара на {date}";
-        var amounts = await _saleRepository.GetProductsTotalAmount(date);
+        var amounts = await _salesReportsRepository.GetProductsTotalAmount(date);
         var lines = amounts.Select(x => $"*{x.Store}:* {x.PurchasingPriceTotal:N0}р.");
 
         return new CommandResult

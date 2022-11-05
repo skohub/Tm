@@ -27,8 +27,8 @@ class Program
         serviceCollection
             .AddHostedService<BotService>()
             .AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(botConfiguration.Token))
-            .AddSingleton<ISaleRepository>(serviceProvider => 
-                new SaleRepository(context.Configuration.GetConnectionString("mag5")))
+            .AddSingleton<ISalesReportsRepository>(serviceProvider => 
+                new SalesReportsRepository(context.Configuration.GetConnectionString("mag5")))
             .AddSingleton<IValidator>(serviceProvider => 
                 new UserValidator(serviceProvider.GetService<ITelegramBotClient>()!, botConfiguration.AllowedUserIds))
             .AddTransient<HelpCommand>()

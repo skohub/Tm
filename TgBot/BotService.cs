@@ -14,13 +14,13 @@ public class BotService : IHostedService
 {
     private ITelegramBotClient _botClient;
     private IEnumerable<IValidator> _validators;
-    private Func<string, ICommand> _commandFactory;
+    private IEnumerable<ICommand> _commands;
 
-    public BotService(ITelegramBotClient botClient, IEnumerable<IValidator> validators, Func<string, ICommand> commandFactory)
+    public BotService(ITelegramBotClient botClient, IEnumerable<IValidator> validators, IEnumerable<ICommand> commands)
     {
         _botClient = botClient;
         _validators = validators;
-        _commandFactory = commandFactory;
+        _commands = commands;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -69,27 +69,21 @@ public class BotService : IHostedService
             return;
         }
 
-        ReplyKeyboardMarkup defaultKeyboardMarkup = new(new []
-        {
-            new KeyboardButton[] { CommandConsts.SalesSummary, CommandConsts.ProductsTotalAmount },
-        })
-        {
-            ResizeKeyboard = true
-        };
-
         var commandArguments = messageText.Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-        var command = _commandFactory(commandArguments.First());
+        var command = GetCommand(commandArguments.First());
         var result = await command.ExecuteAsync(commandArguments, botClient);
-
         await botClient.SendTextMessageAsync(
             chatId: chatId,
             text: result.Text,
-            replyMarkup: result.ReplyMarkup ?? defaultKeyboardMarkup,
+            replyMarkup: result.ReplyMarkup ?? new ReplyKeyboardRemove(),
             parseMode: ParseMode.Markdown,
             cancellationToken: cancellationToken);
     }
 
-    Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    private ICommand GetCommand(string name) =>
+        _commands.FirstOrDefault(x => x.Name == name) ?? _commands.First(x => x.Name == "/help");
+
+    private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         var ErrorMessage = exception switch
         {

@@ -56,7 +56,7 @@ namespace Tm.Data.Repositories
             }
         }
 
-        public async Task<Dictionary<string, string>> GetMonthlySales(int year, int month)
+        public async Task<Dictionary<string, decimal>> GetMonthlySales(int year, int month)
         {
             var startDate = new DateTime(year, month, 1);
             var endDate = startDate.AddMonths(1);
@@ -79,7 +79,7 @@ namespace Tm.Data.Repositories
             {
                 var query = await connection.QueryAsync(sql, new { startDate, endDate, organizationid });
 
-                return query.ToDictionary(x => (string) x.seller, x => (string) x.amount);
+                return query.ToDictionary(x => (string) x.seller, x => (decimal) x.amount);
             }
         }
     }

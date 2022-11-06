@@ -31,16 +31,10 @@ class Program
                 new SalesReportsRepository(context.Configuration.GetConnectionString("mag5")))
             .AddSingleton<IValidator>(serviceProvider => 
                 new UserValidator(serviceProvider.GetService<ITelegramBotClient>()!, botConfiguration.AllowedUserIds))
-            .AddTransient<HelpCommand>()
-            .AddTransient<SalesSummaryCommand>()
-            .AddTransient<ProductsTotalAmountCommand>()
-            .AddTransient<Func<string, ICommand?>>(serviceProvider => command =>
-                command switch
-                {
-                    CommandConsts.SalesSummary => serviceProvider.GetService<SalesSummaryCommand>(),
-                    CommandConsts.ProductsTotalAmount => serviceProvider.GetService<ProductsTotalAmountCommand>(),
-                    _ => serviceProvider.GetService<HelpCommand>()
-                });
+            .AddTransient<ICommand, HelpCommand>()
+            .AddTransient<ICommand, DailySalesCommand>()
+            .AddTransient<ICommand, ProductsTotalAmountCommand>()
+            .AddTransient<ICommand, MonthlySalesCommand>();
 
         return serviceCollection;
     }

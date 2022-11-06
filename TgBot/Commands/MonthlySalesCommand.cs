@@ -4,14 +4,14 @@ using Tm.Data.Interfaces;
 
 namespace Tm.TgBot.Commands;
 
-public class ProductsTotalAmountCommand : ICommand
+public class MonthlySalesCommand : ICommand
 {
     private const string _lineBreak = "\r\n";
-    public string Name => "/totalamount";
+    public string Name => "/monthlysales";
 
     private readonly ISalesReportsRepository _salesReportsRepository;
 
-    public ProductsTotalAmountCommand(ISalesReportsRepository salesReportsRepository)
+    public MonthlySalesCommand(ISalesReportsRepository salesReportsRepository)
     {
         _salesReportsRepository = salesReportsRepository;
     }
@@ -25,9 +25,9 @@ public class ProductsTotalAmountCommand : ICommand
             date = DateTime.Today;
         }
 
-        var header = $"Остатки товара на {date}";
-        var amounts = await _salesReportsRepository.GetProductsTotalAmount(date);
-        var lines = amounts.Select(x => $"*{x.Store}:* {x.PurchasingPriceTotal:N0}р.");
+        var header = $"Продажи за месяц на {date}";
+        var sales = await _salesReportsRepository.GetMonthlySales(date.Year, date.Month);
+        var lines = sales.Select(x => $"*{x.Key}:* {x.Value:N0}р.");
 
         return new CommandResult
         {

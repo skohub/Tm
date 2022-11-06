@@ -4,13 +4,14 @@ using Tm.Data.Interfaces;
 
 namespace Tm.TgBot.Commands;
 
-public class SalesSummaryCommand : ICommand
+public class DailySalesCommand : ICommand
 {
     private const string _lineBreak = "\r\n";
+    public string Name => "/dailysales";
 
     private readonly ISalesReportsRepository _salesReportsRepository;
 
-    public SalesSummaryCommand(ISalesReportsRepository salesReportsRepository)
+    public DailySalesCommand(ISalesReportsRepository salesReportsRepository)
     {
         _salesReportsRepository = salesReportsRepository;
     }

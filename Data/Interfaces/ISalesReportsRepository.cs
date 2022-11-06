@@ -9,6 +9,6 @@ namespace Tm.Data.Interfaces
     {
         Task<IList<SalesSummary>> GetSaleSummaries(DateTime date);
         Task<IList<ProductsTotalAmount>> GetProductsTotalAmount(DateTime date);
-        Task<Dictionary<string, string>> GetMonthlySales(int year, int month);
+        Task<Dictionary<string, decimal>> GetMonthlySales(int year, int month);
     }
 }

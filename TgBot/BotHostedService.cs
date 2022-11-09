@@ -7,20 +7,24 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Tm.TgBot.Commands.Common;
+using Tm.TgBot.Services;
 using Tm.TgBot.Validators;
 
 namespace Tm.TgBot;
-public class BotService : IHostedService
+public class BotHostedService : IHostedService
 {
     private ITelegramBotClient _botClient;
     private IEnumerable<IValidator> _validators;
-    private IEnumerable<ICommand> _commands;
+    private IBotService _botService;
 
-    public BotService(ITelegramBotClient botClient, IEnumerable<IValidator> validators, IEnumerable<ICommand> commands)
+    public BotHostedService(
+        ITelegramBotClient botClient, 
+        IEnumerable<IValidator> validators, 
+        IBotService botService)
     {
         _botClient = botClient;
         _validators = validators;
-        _commands = commands;
+        _botService = botService;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -50,7 +54,7 @@ public class BotService : IHostedService
         return Task.CompletedTask;
     }
 
-    async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         if (update.Type != UpdateType.Message || update.Message!.Type != MessageType.Text)
         {
@@ -69,19 +73,8 @@ public class BotService : IHostedService
             return;
         }
 
-        var commandArguments = messageText.Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-        var command = GetCommand(commandArguments.First());
-        var result = await command.ExecuteAsync(commandArguments, botClient);
-        await botClient.SendTextMessageAsync(
-            chatId: chatId,
-            text: result.Text,
-            replyMarkup: result.ReplyMarkup ?? new ReplyKeyboardRemove(),
-            parseMode: ParseMode.Markdown,
-            cancellationToken: cancellationToken);
+        await _botService.HandleMessageAsync(botClient, update.Message, cancellationToken);
     }
-
-    private ICommand GetCommand(string name) =>
-        _commands.FirstOrDefault(x => x.Name == name) ?? _commands.First(x => x.Name == "/help");
 
     private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {

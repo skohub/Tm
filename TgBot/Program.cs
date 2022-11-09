@@ -7,6 +7,7 @@ using Tm.TgBot.Commands.Common;
 using Tm.TgBot.Validators;
 using Tm.Data.Interfaces;
 using Tm.Data.Repositories;
+using Tm.TgBot.Services;
 
 namespace Tm.TgBot;
 class Program
@@ -25,7 +26,8 @@ class Program
         var botConfiguration = context.Configuration.GetSection("Configuration").Get<Configuration>();
 
         serviceCollection
-            .AddHostedService<BotService>()
+            .AddHostedService<BotHostedService>()
+            .AddTransient<IBotService, BotService>()
             .AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(botConfiguration.Token))
             .AddSingleton<ISalesReportsRepository>(serviceProvider => 
                 new SalesReportsRepository(context.Configuration.GetConnectionString("mag5")))

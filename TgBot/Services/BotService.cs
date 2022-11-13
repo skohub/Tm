@@ -1,5 +1,4 @@
 using Telegram.Bot;
-using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -9,17 +8,20 @@ namespace Tm.TgBot.Services;
 public class BotService : IBotService
 {
     private IEnumerable<ICommand> _commands;
+    private IDictionary<long, ICommand> _state = new Dictionary<long, ICommand>();
+    private string _defaultCommandName = "/help";
 
-    public BotService(IEnumerable<ICommand> commands)
-    {
+    public BotService(IEnumerable<ICommand> commands) =>
         _commands = commands;
-    }
 
     public async Task HandleMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
-        var commandArguments = message.Text!.Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-        var command = GetCommand(commandArguments.First());
-        var result = await command.ExecuteAsync(commandArguments, botClient);
+        var userId = message.From?.Id ?? throw new ArgumentNullException(nameof(message.From.Id));
+        var (commandName, arguments) = ParseMessageText(message.Text!);
+        var command = GetCommand(commandName, userId);
+        var result = await command.ExecuteAsync(arguments, botClient);
+        UpdateState(command, userId, result);
+
         await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: result.Text,
@@ -28,6 +30,36 @@ public class BotService : IBotService
             cancellationToken: cancellationToken);
     }
 
-    private ICommand GetCommand(string name) =>
-        _commands.FirstOrDefault(x => x.Name == name) ?? _commands.First(x => x.Name == "/help");
+    private (string, string[]) ParseMessageText(string text)
+    {
+        var arguments = text.Split(' ').Where(x => !string.IsNullOrEmpty(x));
+
+        return (arguments.First(), arguments.ToArray());
+    }
+
+    private ICommand GetCommand(string name, long userId) =>
+        GetCommandByName(name) ??
+        GetCommandFromState(userId) ??
+        GetDefaultCommand();
+
+    private ICommand? GetCommandByName(string name) => 
+        _commands.FirstOrDefault(x => x.Name == name);
+
+    private ICommand? GetCommandFromState(long userId) =>
+        _state.TryGetValue(userId, out var command) ? command : null;
+
+    private ICommand GetDefaultCommand() =>
+        _commands.First(x => x.Name == _defaultCommandName);
+
+    private void UpdateState(ICommand command, long userId, CommandResult result)
+    {
+        if (result.ReplyMarkup is null)
+        {
+            _state.Remove(userId);
+        }
+        else
+        {
+            _state[userId] = command;
+        }
+    }
 }

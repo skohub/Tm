@@ -5,6 +5,7 @@ on:
     branches: [ "master" ]
     paths:
       - TgBot/**
+      - .github/workflows/**
 
 env:
   REGISTRY: ghcr.io

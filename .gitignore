@@ -8,8 +8,6 @@
 x64/
 [Bb]in/
 [Oo]bj/
-InvoiceImport/
-Auth/
 
 # Test results
 TestResult.xml

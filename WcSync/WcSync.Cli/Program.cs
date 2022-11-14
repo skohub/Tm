@@ -1,52 +1,40 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Tm.WcSync.Db;
 using Tm.WcSync.Model;
 using Tm.WcSync.Sync;
 using Tm.WcSync.Wc;
 
-namespace Tm.WcSync.Cli
+namespace Tm.WcSync.Cli;
+class Program
 {
-    class Program
+    static async Task Main(string[] args)
     {
-        static async Task Main(string[] args)
-        {
-            var serviceProvider = ConfigureServices(new ServiceCollection()).BuildServiceProvider();
+        using IHost host = CreateHostBuilder(args).Build();
+        await host.RunAsync();
+    }
 
-            var productService = serviceProvider.GetService<IProductService>();
-            
-            var command = args.Length == 1 ? args[0].ToLower() : "update";
-            switch (command) 
-            {
-                case "list":
-                    await productService.ListProductsDicrepancies();
-                    break;
-                case "update":
-                    await productService.UpdateAllProductsAsync();
-                    break;
-                default:
-                    await productService.UpdateAllProductsAsync();
-                    break;
-            }
-        }
+    static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureServices((context, services) => ConfigureServices(args, context, services));
 
-        private static IServiceCollection ConfigureServices(IServiceCollection serviceCollection) {
-            var configuration = new ConfigurationBuilder()
-                .AddEnvironmentVariables("WcSync")
-                .Build();
+    private static IServiceCollection ConfigureServices(
+        string[] args,
+        HostBuilderContext context,
+        IServiceCollection services)
+    {
+        var command = args.Length == 1 ? args[0].ToLower() : "update";
 
-            serviceCollection
-                .AddSingleton<IWcProductService, WcProductService>()
-                .AddSingleton<IDbProductRepository, DbProductRepository>()
-                .AddSingleton<IProductService, ProductService>()
-                .AddSingleton<IConfiguration>(configuration)
-                .AddTransient<IPriceCalculator, PriceCalculator>();
+        services
+            .AddHostedService<HostedService>(serviceProvider => 
+                new HostedService(serviceProvider.GetService<ISyncService>(), command))
+            .AddTransient<ISyncService, SyncService>()
+            .AddTransient<IWcProductService, WcProductService>()
+            .AddTransient<IProductService, ProductService>()
+            .AddTransient<IPriceCalculator, PriceCalculator>()
+            .AddSingleton<IDbProductRepository, DbProductRepository>();
 
-            serviceCollection.AddLogging(configure => configure.AddConsole(c => c.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] "));
-
-            return serviceCollection;
-        }
+        return services;
     }
 }

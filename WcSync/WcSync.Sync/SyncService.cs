@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Tm.WcSync.Model;
 
@@ -11,18 +12,18 @@ public class SyncService : ISyncService
         _productService = productService;
     }
 
-    public async Task RunAsync(string command)
+    public async Task RunAsync(string command, CancellationToken cancellationToken)
     {
         switch (command) 
         {
             case "list":
-                await _productService.ListProductsDicrepancies();
+                await _productService.ListProductsDicrepanciesAsync(cancellationToken);
                 break;
             case "update":
-                await _productService.UpdateAllProductsAsync();
+                await _productService.UpdateAllProductsAsync(cancellationToken);
                 break;
             default:
-                await _productService.UpdateAllProductsAsync();
+                await _productService.UpdateAllProductsAsync(cancellationToken);
                 break;
         }
     }

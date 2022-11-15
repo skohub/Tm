@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Tm.WcSync.Model.Entities;
 
 namespace Tm.WcSync.Db
 {
     public interface IDbProductRepository
     {
-        List<DbProduct> GetRecentlyUpdatedProducts();
+        Task<List<DbProduct>> GetRecentlyUpdatedProductsAsync();
 
-        List<DbProduct> GetProducts();
+        Task<List<DbProduct>> GetProductsAsync();
     }
 }

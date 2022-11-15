@@ -4,6 +4,7 @@ using Tm.WcSync.Model.Entities;
 using Microsoft.Extensions.Configuration;
 using Dapper;
 using MySql.Data.MySqlClient;
+using System.Threading.Tasks;
 
 namespace Tm.WcSync.Db
 {
@@ -20,13 +21,13 @@ namespace Tm.WcSync.Db
             _configuration = configuration;
         }
 
-        public List<DbProduct> GetRecentlyUpdatedProducts()
+        public async Task<List<DbProduct>> GetRecentlyUpdatedProductsAsync()
         {
             // get a flat list of products and group by productid
-            return Connection
-                .Query<FlatProductDto>(
-                    sql: "call recently_updated_items(?)",
-                    param: new { days_offset = 1 })
+            var query = await Connection.QueryAsync<FlatProductDto>(
+                sql: "call recently_updated_items(?)",
+                param: new { days_offset = 1 });
+            return query
                 .GroupBy(
                     flatProduct => flatProduct.ProductId, 
                     flatProduct => flatProduct,
@@ -46,11 +47,11 @@ namespace Tm.WcSync.Db
                 .ToList();
         }
 
-        public List<DbProduct> GetProducts()
+        public async Task<List<DbProduct>> GetProductsAsync()
         {
             // get a flat list of products and group by productid
-            return Connection
-                .Query<ItemRestDto>(sql: "call items_rest(0)")
+            var query = await Connection.QueryAsync<ItemRestDto>(sql: "call items_rest(0)");
+            return query
                 .Where(p => p.StoreType == StoreType.Shop || p.StoreType == StoreType.Warehouse)
                 .GroupBy(
                     product => product.ItemID, 

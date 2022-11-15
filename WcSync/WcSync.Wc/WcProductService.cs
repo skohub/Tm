@@ -11,6 +11,7 @@ using ProductMeta = WooCommerceNET.WooCommerce.v2.ProductMeta;
 using Tm.WcSync.Model.Entities;
 using System.Net;
 using Tm.WcSync.Model;
+using System.Threading;
 
 namespace Tm.WcSync.Wc
 {
@@ -76,7 +77,7 @@ namespace Tm.WcSync.Wc
             await WcClient.Product.UpdateRange(batch);
         }
 
-        public async Task<List<WcProduct>> GetProductsAsync()
+        public async Task<List<WcProduct>> GetProductsAsync(CancellationToken cancellationToken)
         {
             var products = new List<Product>();
             var page = 1;
@@ -85,6 +86,7 @@ namespace Tm.WcSync.Wc
             // Keep requests single threaded to prevent WooCommerce server overload
             while (page <= _totalPages)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 _logger.LogInformation($"Retrieveing products, page {page}/{(_totalPages == 1 ? "?" : _totalPages.ToString())}");
 
                 try
@@ -100,10 +102,10 @@ namespace Tm.WcSync.Wc
                 {
                     _logger.LogError(e, "Failed to retrieve products page");
                     
-                    await Task.Delay(Consts.FailedRequestDelay);
+                    await Task.Delay(Consts.FailedRequestDelay, cancellationToken);
                 }
 
-                await Task.Delay(Consts.RequestDelay);
+                await Task.Delay(Consts.RequestDelay, cancellationToken);
             }
 
             return products
@@ -153,10 +155,6 @@ namespace Tm.WcSync.Wc
                 _configuration["WcSecret"],
                 authorizedHeader: false,
                 responseFilter: ResponseFilter);
-
-            _logger.LogInformation($"WcHost: {_configuration["WcHost"]}/wp-json/wc/v3/");
-            _logger.LogInformation($"WcClient: {_configuration["WcClient"]}");
-            _logger.LogInformation($"WcSecret: {_configuration["WcSecret"]}");
 
             return new WCObject(rest);
         }

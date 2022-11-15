@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Tm.WcSync.Model;
 using Tm.WcSync.Model.Entities;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Tm.WcSync.Sync
 {
@@ -29,20 +30,22 @@ namespace Tm.WcSync.Sync
             _logger = logger;
         }
 
-        public async Task UpdateAllProductsAsync()
+        public async Task UpdateAllProductsAsync(CancellationToken cancellationToken)
         {
             _logger.LogDebug($"Begin {nameof(UpdateAllProductsAsync)}");
 
             try
             {
-                var dbProducts = _dbProductRepository.GetProducts();
-                var wcProducts = await _wcProductService.GetProductsAsync();
+                var dbProducts = await _dbProductRepository.GetProductsAsync();
+                var wcProducts = await _wcProductService.GetProductsAsync(cancellationToken);
                 var updatedWcProducts = new List<WcProduct>();
 
                 foreach (var wcProduct in wcProducts)
                 {
-                    var dbProduct = dbProducts.FirstOrDefault(p => int.TryParse(wcProduct.Sku, out int id) && p.Id == id);
+                    cancellationToken.ThrowIfCancellationRequested();
 
+                    var dbProduct = dbProducts.FirstOrDefault(p => 
+                        int.TryParse(wcProduct.Sku, out int id) && p.Id == id);
                     if (dbProduct == null) 
                     {
                         if (wcProduct.StockStatus != Consts.UnavailableStatus)
@@ -62,7 +65,7 @@ namespace Tm.WcSync.Sync
 
                 if (updatedWcProducts.Any())
                 {
-                    await UpdateProductsBatchAsync(updatedWcProducts);
+                    await UpdateProductsBatchAsync(updatedWcProducts, cancellationToken);
                 }
             }
             catch (Exception e)
@@ -73,13 +76,15 @@ namespace Tm.WcSync.Sync
             _logger.LogDebug($"End {nameof(UpdateAllProductsAsync)}");
         }
 
-        public async Task ListProductsDicrepancies()
+        public async Task ListProductsDicrepanciesAsync(CancellationToken cancellationToken)
         {
-            var dbProducts = _dbProductRepository.GetProducts();
-            var wcProducts = await _wcProductService.GetProductsAsync();
+            var dbProducts = await _dbProductRepository.GetProductsAsync();
+            var wcProducts = await _wcProductService.GetProductsAsync(cancellationToken);
 
             foreach (var wcProduct in wcProducts.Where(p => p.Availability?.Any() == true))
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var dbProduct = dbProducts.FirstOrDefault(p => int.TryParse(wcProduct.Sku, out int id) && p.Id == id);
                 if (dbProduct == null) continue;
 
@@ -101,16 +106,17 @@ namespace Tm.WcSync.Sync
             notFoundProducts.ForEach(product => _logger.LogInformation($"Not found product: {product.Name} - {product.Id}"));
         }
 
-        private async Task UpdateProductsBatchAsync(List<WcProduct> wcProducts)
+        private async Task UpdateProductsBatchAsync(List<WcProduct> wcProducts, CancellationToken cancellationToken)
         {
             var position = 0;
-            do 
+            do
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var batch = wcProducts.Skip(position).Take(Consts.BatchSize).ToList();
                 _logger.LogInformation($"Updating products {position}-{position + batch.Count}");
                 await _wcProductService.UpdateProductsAsync(batch);
                 position += batch.Count;
-                await Task.Delay(Consts.RequestDelay);
+                await Task.Delay(Consts.RequestDelay, cancellationToken);
             }
             while (position < wcProducts.Count);
         }

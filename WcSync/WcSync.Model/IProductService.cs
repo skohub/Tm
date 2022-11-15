@@ -1,11 +1,12 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tm.WcSync.Model
 {
     public interface IProductService
     {
-        Task UpdateAllProductsAsync();
+        Task UpdateAllProductsAsync(CancellationToken cancellationToken);
 
-        Task ListProductsDicrepancies();
+        Task ListProductsDicrepanciesAsync(CancellationToken cancellationToken);
     }
 }

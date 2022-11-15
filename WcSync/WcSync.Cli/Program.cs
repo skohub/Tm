@@ -25,10 +25,10 @@ class Program
         IServiceCollection services)
     {
         var command = args.Length == 1 ? args[0].ToLower() : "update";
-
         services
-            .AddHostedService<HostedService>(serviceProvider => 
-                new HostedService(serviceProvider.GetService<ISyncService>(), command))
+            .AddHostedService<HostedService>(serviceProvider => new HostedService(
+                serviceProvider.GetService<ISyncService>(), 
+                command))
             .AddTransient<ISyncService, SyncService>()
             .AddTransient<IWcProductService, WcProductService>()
             .AddTransient<IProductService, ProductService>()

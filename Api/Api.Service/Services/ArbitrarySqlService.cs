@@ -16,7 +16,7 @@ namespace Api.Service.Services
         {
             using (var connection = _connectionFactory.Build(connectionStringName))
             {
-                return con.Query(sql, param).ToList();
+                return connection.Query(sql, param).ToList();
             }
         }
     }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 
 namespace Api.Tests
@@ -11,7 +12,8 @@ namespace Api.Tests
             if (_configuration != null) return _configuration;
 
             _configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.Development.json", true)
+                .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
+                .AddJsonFile("appsettings.json", optional: true)
                 .Build();
 
             return _configuration;

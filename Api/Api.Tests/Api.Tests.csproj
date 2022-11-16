@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
+    <UserSecretsId>1bf74f28-7dd8-4e6a-9d72-6c1d31c4be9e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +21,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Api.Service\Api.Service.csproj" />
     <ProjectReference Include="..\..\Data\Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

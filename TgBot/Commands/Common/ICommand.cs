@@ -1,6 +1,6 @@
 using Telegram.Bot;
 
-namespace Tm.TgBot.Commands.Common;
+namespace TgBot.Commands.Common;
 public interface ICommand
 {
     string Name { get; }

@@ -1,4 +1,4 @@
-namespace Tm.WcSync.Model.Entities
+namespace WcSync.Model.Entities
 {
     public class Store 
     {

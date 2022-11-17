@@ -1,7 +1,7 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Tm.TgBot.Services
+namespace TgBot.Services
 {
     public interface IBotService
     {

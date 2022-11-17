@@ -1,4 +1,4 @@
-namespace Tm.WcSync.Model
+namespace WcSync.Model
 {
     public class Consts {
         public const int RequestDelay = 3000;

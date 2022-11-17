@@ -1,6 +1,6 @@
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Tm.TgBot.Commands.Common;
+namespace TgBot.Commands.Common;
 public class CommandResult
 {
     public string Text { get; set; } = string.Empty;

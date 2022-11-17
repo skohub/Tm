@@ -1,15 +1,15 @@
 using System;
 using System.Linq;
-using Tm.WcSync.Wc;
-using Tm.WcSync.Db;
+using WcSync.Wc;
+using WcSync.Db;
 using System.Threading.Tasks;
-using Tm.WcSync.Model;
-using Tm.WcSync.Model.Entities;
+using WcSync.Model;
+using WcSync.Model.Entities;
 using System.Collections.Generic;
 using System.Threading;
 using Serilog;
 
-namespace Tm.WcSync.Sync
+namespace WcSync.Sync
 {
     public class ProductService : IProductService
     {

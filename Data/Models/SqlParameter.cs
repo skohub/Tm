@@ -1,4 +1,4 @@
-﻿namespace Tm.Data.Models
+﻿namespace Data.Models
 {
     public class SqlParameter
     {

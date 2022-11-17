@@ -7,13 +7,13 @@ using WooCommerceNET;
 using WooCommerceNET.WooCommerce.v3;
 using Product = WooCommerceNET.WooCommerce.v3.Product;
 using ProductMeta = WooCommerceNET.WooCommerce.v2.ProductMeta;
-using Tm.WcSync.Model.Entities;
+using WcSync.Model.Entities;
 using System.Net;
-using Tm.WcSync.Model;
+using WcSync.Model;
 using System.Threading;
 using Serilog;
 
-namespace Tm.WcSync.Wc
+namespace WcSync.Wc
 {
     public class WcProductService : IWcProductService
     {

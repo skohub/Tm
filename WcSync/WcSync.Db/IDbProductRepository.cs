@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tm.WcSync.Model.Entities;
+using WcSync.Model.Entities;
 
-namespace Tm.WcSync.Db
+namespace WcSync.Db
 {
     public interface IDbProductRepository
     {

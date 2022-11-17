@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Tm.WcSync.Model;
+using WcSync.Model;
 
-namespace Tm.WcSync.Sync;
+namespace WcSync.Sync;
 public class SyncService : ISyncService
 {
     private readonly IProductService _productService;

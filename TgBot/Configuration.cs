@@ -1,4 +1,4 @@
-namespace Tm.TgBot;
+namespace TgBot;
 public class Configuration
 {
     public string Token { get; set; } = string.Empty;

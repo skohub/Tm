@@ -2,7 +2,6 @@
 using Data.Interfaces;
 using Data.Models;
 using Microsoft.AspNetCore.Mvc;
-using Tm.Data.Models;
 
 namespace Api.Service.Controllers
 {

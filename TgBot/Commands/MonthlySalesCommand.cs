@@ -1,10 +1,10 @@
 using Telegram.Bot;
-using Tm.TgBot.Commands.Common;
-using Tm.Data.Interfaces;
+using TgBot.Commands.Common;
+using Data.Interfaces;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Globalization;
 
-namespace Tm.TgBot.Commands;
+namespace TgBot.Commands;
 
 public class MonthlySalesCommand : ICommand
 {

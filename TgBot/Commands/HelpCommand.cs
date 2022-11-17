@@ -1,7 +1,7 @@
 using Telegram.Bot;
-using Tm.TgBot.Commands.Common;
+using TgBot.Commands.Common;
 
-namespace Tm.TgBot.Commands;
+namespace TgBot.Commands;
 
 public class HelpCommand : ICommand
 {

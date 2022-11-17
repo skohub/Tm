@@ -2,15 +2,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
-using Tm.TgBot.Commands;
-using Tm.TgBot.Commands.Common;
-using Tm.TgBot.Validators;
-using Tm.Data.Interfaces;
-using Tm.Data.Repositories;
-using Tm.TgBot.Services;
+using TgBot.Commands;
+using TgBot.Commands.Common;
+using TgBot.Validators;
+using Data.Interfaces;
+using Data.Repositories;
+using TgBot.Services;
 using Serilog;
 
-namespace Tm.TgBot;
+namespace TgBot;
 class Program
 {
     static async Task Main(string[] args)

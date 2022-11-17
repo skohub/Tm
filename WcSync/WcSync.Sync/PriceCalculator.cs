@@ -1,8 +1,8 @@
 using System.Linq;
 using Serilog;
-using Tm.WcSync.Model.Entities;
+using WcSync.Model.Entities;
 
-namespace Tm.WcSync.Sync
+namespace WcSync.Sync
 {
     public class PriceCalculator : IPriceCalculator
     {

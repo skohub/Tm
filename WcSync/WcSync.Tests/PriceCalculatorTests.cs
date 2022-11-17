@@ -1,16 +1,16 @@
 using System;
 using Moq;
 using NUnit.Framework;
-using Tm.WcSync.Wc;
-using Tm.WcSync.Db;
+using WcSync.Wc;
+using WcSync.Db;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tm.WcSync.Model.Entities;
-using Tm.WcSync.Sync;
+using WcSync.Model.Entities;
+using WcSync.Sync;
 using System.Linq;
 using Serilog;
 
-namespace Tm.WcSync.Tests
+namespace WcSync.Tests
 {
     [TestFixture]
     public class PriceCalculatorTests

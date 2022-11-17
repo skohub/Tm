@@ -1,8 +1,8 @@
 using Telegram.Bot;
-using Tm.TgBot.Commands.Common;
-using Tm.Data.Interfaces;
+using TgBot.Commands.Common;
+using Data.Interfaces;
 
-namespace Tm.TgBot.Commands;
+namespace TgBot.Commands;
 
 public class ProductsTotalAmountCommand : ICommand
 {

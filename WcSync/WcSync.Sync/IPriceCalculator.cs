@@ -1,6 +1,6 @@
-using Tm.WcSync.Model.Entities;
+using WcSync.Model.Entities;
 
-namespace Tm.WcSync.Sync
+namespace WcSync.Sync
 {
     public interface IPriceCalculator
     {

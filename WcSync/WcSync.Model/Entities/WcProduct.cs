@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Tm.WcSync.Model.Entities
+namespace WcSync.Model.Entities
 {
     public class WcProduct 
     {

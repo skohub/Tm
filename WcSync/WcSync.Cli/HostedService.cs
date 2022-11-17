@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Tm.WcSync.Model;
+using WcSync.Model;
 
-namespace Tm.WcSync.Cli;
+namespace WcSync.Cli;
 public class HostedService : BackgroundService
 {
     private readonly ISyncService _syncService;

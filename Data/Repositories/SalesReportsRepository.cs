@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tm.Data.Models;
+using Data.Models;
 using Dapper;
 using MySql.Data.MySqlClient;
 using System.Linq;
-using Tm.Data.Interfaces;
+using Data.Interfaces;
 using System.Data;
 
-namespace Tm.Data.Repositories
+namespace Data.Repositories
 {
     public class SalesReportsRepository : ISalesReportsRepository
     {

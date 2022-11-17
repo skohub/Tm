@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Tm.Data.Models;
+using Data.Models;
 
-namespace Tm.Data.Interfaces
+namespace Data.Interfaces
 {
     public interface ISalesReportsRepository
     {

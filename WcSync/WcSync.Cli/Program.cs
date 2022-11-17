@@ -2,12 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Tm.WcSync.Db;
-using Tm.WcSync.Model;
-using Tm.WcSync.Sync;
-using Tm.WcSync.Wc;
+using WcSync.Db;
+using WcSync.Model;
+using WcSync.Sync;
+using WcSync.Wc;
 
-namespace Tm.WcSync.Cli;
+namespace WcSync.Cli;
 class Program
 {
     static async Task Main(string[] args)

@@ -6,10 +6,10 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Tm.TgBot.Services;
-using Tm.TgBot.Validators;
+using TgBot.Services;
+using TgBot.Validators;
 
-namespace Tm.TgBot;
+namespace TgBot;
 public class BotHostedService : BackgroundService
 {
     private ITelegramBotClient _botClient;

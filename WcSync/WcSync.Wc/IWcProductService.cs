@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Tm.WcSync.Model.Entities;
+using WcSync.Model.Entities;
 
-namespace Tm.WcSync.Wc 
+namespace WcSync.Wc 
 {
     public interface IWcProductService
     {

@@ -3,7 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Tm.TgBot.Validators;
+namespace TgBot.Validators;
 public class UserValidator : IValidator
 {
     private ITelegramBotClient _botClient { get; set; }

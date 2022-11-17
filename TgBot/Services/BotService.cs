@@ -2,9 +2,9 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using Tm.TgBot.Commands.Common;
+using TgBot.Commands.Common;
 
-namespace Tm.TgBot.Services;
+namespace TgBot.Services;
 public class BotService : IBotService
 {
     private IEnumerable<ICommand> _commands;

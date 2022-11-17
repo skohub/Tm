@@ -1,12 +1,12 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using Tm.WcSync.Model.Entities;
+using WcSync.Model.Entities;
 using Microsoft.Extensions.Configuration;
 using Dapper;
 using MySql.Data.MySqlClient;
 using System.Threading.Tasks;
 
-namespace Tm.WcSync.Db
+namespace WcSync.Db
 {
     public class DbProductRepository : IDbProductRepository
     {

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Tm.WcSync.Model.Entities;
 using Tm.WcSync.Sync;
 using System.Linq;
+using System.Threading;
 
 namespace Tm.WcSync.Tests
 {
@@ -48,15 +49,17 @@ namespace Tm.WcSync.Tests
                 }
             };
 
+            var cancellationToken = new CancellationToken();
+
             _wcProductServiceMock = new Mock<IWcProductService>();
             _wcProductServiceMock
-                .Setup(m => m.GetProductsAsync())
+                .Setup(m => m.GetProductsAsync(cancellationToken))
                 .Returns(Task.FromResult(new List<WcProduct>{ DefaultWcProduct }));
 
             _dbProductRepositoryMock = new Mock<IDbProductRepository>();
             _dbProductRepositoryMock
-                .Setup(r => r.GetProducts())
-                .Returns(new List<DbProduct>{ DefaultDbProduct });
+                .Setup(r => r.GetProductsAsync())
+                .ReturnsAsync(new List<DbProduct>{ DefaultDbProduct });
 
             var loggerMock = new Mock<ILogger<ProductService>>();
 
@@ -73,7 +76,7 @@ namespace Tm.WcSync.Tests
             // Arrange
 
             // Act
-            await _productService.UpdateAllProductsAsync();
+            await _productService.UpdateAllProductsAsync(new CancellationToken());
 
             // Assert
         }
@@ -84,10 +87,10 @@ namespace Tm.WcSync.Tests
             // Arrange
             DefaultDbProduct.Availability.First().Price = 10000;
             DefaultWcProduct.RegularPrice = 10000;
-            DefaultWcProduct.SalePrice = 9700;
+            DefaultWcProduct.SalePrice = 10000;
 
             // Act
-            await _productService.UpdateAllProductsAsync();
+            await _productService.UpdateAllProductsAsync(new CancellationToken());
 
             // Assert
             _wcProductServiceMock.Verify(
@@ -106,7 +109,7 @@ namespace Tm.WcSync.Tests
             DefaultWcProduct.SalePrice = salePrice;
 
             // Act
-            await _productService.UpdateAllProductsAsync();
+            await _productService.UpdateAllProductsAsync(new CancellationToken());
 
             // Assert
             _wcProductServiceMock.Verify(

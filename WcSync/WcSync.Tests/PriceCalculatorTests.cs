@@ -31,7 +31,7 @@ namespace Tm.WcSync.Tests
         }
 
         [Test]
-        public void InconsistentAvailabilityShouldReturnNull()
+        public void InconsistentAvailabilityShouldReturnAny()
         {
             // Arrange
             var loggerMock = new Mock<ILogger<ProductService>>();
@@ -60,8 +60,9 @@ namespace Tm.WcSync.Tests
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
 
             // Assert
-            Assert.IsNull(price);
-            Assert.IsNull(salePrice);
+            Assert.IsTrue(
+                (price == 1000 && salePrice == 1000) ||
+                (price == 2000 && salePrice == 2000));
         }
 
         [Test]
@@ -205,7 +206,7 @@ namespace Tm.WcSync.Tests
 
             // Assert
             Assert.AreEqual(10000, price);
-            Assert.AreEqual(9700, salePrice);
+            Assert.AreEqual(10000, salePrice); // Discounts are disabled
         }
 
         [Test]
@@ -251,7 +252,7 @@ namespace Tm.WcSync.Tests
 
             // Assert
             Assert.AreEqual(10000, price);
-            Assert.AreEqual(9700, salePrice);
+            Assert.AreEqual(10000, salePrice);
         }
     }
 }

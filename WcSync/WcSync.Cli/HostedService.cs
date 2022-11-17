@@ -8,12 +8,15 @@ using WcSync.Model;
 namespace WcSync.Cli;
 public class HostedService : BackgroundService
 {
+    private readonly IHostApplicationLifetime _host;
     private readonly ISyncService _syncService;
     private readonly ILogger _logger;
     private readonly string _command;
 
-    public HostedService(ISyncService syncService, ILogger logger, string command) =>
-        (_syncService, _logger, _command) = (syncService, logger, command);
+    public HostedService(IHostApplicationLifetime host, ISyncService syncService, 
+        ILogger logger, string command) =>
+        (_host, _syncService, _logger, _command) = 
+        (host, syncService, logger, command);
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -28,6 +31,11 @@ public class HostedService : BackgroundService
         catch (Exception e)
         {
             _logger.Error(e, "An error occured");
+        }
+        finally
+        {
+            Environment.ExitCode = 0;
+            _host.StopApplication();
         }
     }
 

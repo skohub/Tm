@@ -32,6 +32,7 @@ class Program
         var command = args.Length == 1 ? args[0].ToLower() : "update";
         services
             .AddHostedService<HostedService>(services => new HostedService(
+                services.GetService<IHostApplicationLifetime>(),
                 services.GetService<ISyncService>(),
                 services.GetService<ILogger>(),
                 command))

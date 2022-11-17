@@ -10,7 +10,7 @@ using Tm.TgBot.Services;
 using Tm.TgBot.Validators;
 
 namespace Tm.TgBot;
-public class BotHostedService : IHostedService
+public class BotHostedService : BackgroundService
 {
     private ITelegramBotClient _botClient;
     private IEnumerable<IValidator> _validators;
@@ -29,31 +29,22 @@ public class BotHostedService : IHostedService
         _logger = logger;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         CultureInfo.CurrentCulture = new CultureInfo("ru-RU", false);
-
-        // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
         var receiverOptions = new ReceiverOptions
         {
             AllowedUpdates = { } // receive all update types
         };
-        _botClient.StartReceiving(
-            HandleUpdateAsync,
-            HandleErrorAsync,
-            receiverOptions,
-            cancellationToken);
 
-        var me = await _botClient.GetMeAsync();
-
-        _logger.Information("Start listening for {Username}", me.Username);
+        await _botClient.ReceiveAsync(HandleUpdateAsync, HandleErrorAsync, receiverOptions, stoppingToken);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async override Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.Information("Stop");
 
-        return Task.CompletedTask;
+        await base.StopAsync(cancellationToken);
     }
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)

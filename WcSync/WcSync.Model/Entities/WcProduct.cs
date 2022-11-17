@@ -5,7 +5,7 @@ namespace WcSync.Model.Entities
 {
     public class WcProduct 
     {
-        public int Id { get; set; }
+        public ulong Id { get; set; }
 
         public string Sku { get; set; }
 

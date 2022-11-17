@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using Tm.WcSync.Db;
 using Tm.WcSync.Model;
 using Tm.WcSync.Sync;
@@ -17,6 +18,10 @@ class Program
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .UseSerilog((context, services, loggerConfiguration) => loggerConfiguration
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.FromLogContext()
+            )
             .ConfigureServices((context, services) => ConfigureServices(args, context, services));
 
     private static IServiceCollection ConfigureServices(

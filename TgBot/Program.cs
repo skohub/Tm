@@ -8,6 +8,7 @@ using Tm.TgBot.Validators;
 using Tm.Data.Interfaces;
 using Tm.Data.Repositories;
 using Tm.TgBot.Services;
+using Serilog;
 
 namespace Tm.TgBot;
 class Program
@@ -20,6 +21,10 @@ class Program
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .UseSerilog((context, services, loggerConfiguration) => loggerConfiguration
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.FromLogContext()
+            )
             .ConfigureServices((context, services) => ConfigureServices(context, services));
 
     public static IServiceCollection ConfigureServices(HostBuilderContext context, IServiceCollection serviceCollection) {
@@ -29,10 +34,12 @@ class Program
             .AddHostedService<BotHostedService>()
             .AddTransient<IBotService, BotService>()
             .AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(botConfiguration.Token))
-            .AddSingleton<ISalesReportsRepository>(serviceProvider => 
+            .AddSingleton<ISalesReportsRepository>(services => 
                 new SalesReportsRepository(context.Configuration.GetConnectionString("mag5")))
-            .AddSingleton<IValidator>(serviceProvider => 
-                new UserValidator(serviceProvider.GetService<ITelegramBotClient>()!, botConfiguration.AllowedUserIds))
+            .AddSingleton<IValidator>(services => 
+                new UserValidator(services.GetService<ITelegramBotClient>()!,
+                botConfiguration.AllowedUserIds,
+                services.GetService<ILogger>()!))
             .AddTransient<ICommand, HelpCommand>()
             .AddTransient<ICommand, DailySalesCommand>()
             .AddTransient<ICommand, ProductsTotalAmountCommand>()

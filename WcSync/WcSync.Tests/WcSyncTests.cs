@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
 using Tm.WcSync.Wc;
 using Tm.WcSync.Db;
@@ -10,6 +8,7 @@ using Tm.WcSync.Model.Entities;
 using Tm.WcSync.Sync;
 using System.Linq;
 using System.Threading;
+using Serilog;
 
 namespace Tm.WcSync.Tests
 {
@@ -61,7 +60,7 @@ namespace Tm.WcSync.Tests
                 .Setup(r => r.GetProductsAsync())
                 .ReturnsAsync(new List<DbProduct>{ DefaultDbProduct });
 
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
 
             _productService = new ProductService(
                 _wcProductServiceMock.Object,

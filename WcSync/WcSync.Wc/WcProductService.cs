@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using WooCommerceNET;
 using WooCommerceNET.WooCommerce.v3;
 using Product = WooCommerceNET.WooCommerce.v3.Product;
@@ -12,6 +11,7 @@ using Tm.WcSync.Model.Entities;
 using System.Net;
 using Tm.WcSync.Model;
 using System.Threading;
+using Serilog;
 
 namespace Tm.WcSync.Wc
 {
@@ -21,13 +21,13 @@ namespace Tm.WcSync.Wc
         private const string _fixedPriceMetaKey = "fixed_price";
 
         private readonly IConfiguration _configuration;
-        private readonly ILogger<WcProductService> _logger;
+        private readonly ILogger _logger;
         private WCObject _wcObject;
         private int _totalPages;
 
         private WCObject WcClient => _wcObject ?? (_wcObject = Connect());
 
-        public WcProductService(IConfiguration configuration, ILogger<WcProductService> logger)
+        public WcProductService(IConfiguration configuration, ILogger logger)
         {
             _configuration = configuration;
             _logger = logger;
@@ -87,7 +87,8 @@ namespace Tm.WcSync.Wc
             while (page <= _totalPages)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                _logger.LogInformation($"Retrieveing products, page {page}/{(_totalPages == 1 ? "?" : _totalPages.ToString())}");
+                _logger.Information("Retrieveing products, page {Page}/{Total}",
+                    page, _totalPages == 1 ? "?" : _totalPages.ToString());
 
                 try
                 {
@@ -100,7 +101,7 @@ namespace Tm.WcSync.Wc
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "Failed to retrieve products page");
+                    _logger.Error(e, "Failed to retrieve products page");
                     
                     await Task.Delay(Consts.FailedRequestDelay, cancellationToken);
                 }

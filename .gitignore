@@ -11,3 +11,6 @@ x64/
 
 # Test results
 TestResult.xml
+
+# Logs
+logs/

@@ -1,12 +1,11 @@
 using System.Globalization;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
-using Tm.TgBot.Commands.Common;
 using Tm.TgBot.Services;
 using Tm.TgBot.Validators;
 
@@ -16,15 +15,18 @@ public class BotHostedService : IHostedService
     private ITelegramBotClient _botClient;
     private IEnumerable<IValidator> _validators;
     private IBotService _botService;
+    private readonly ILogger _logger;
 
     public BotHostedService(
         ITelegramBotClient botClient, 
         IEnumerable<IValidator> validators, 
-        IBotService botService)
+        IBotService botService,
+        ILogger logger)
     {
         _botClient = botClient;
         _validators = validators;
         _botService = botService;
+        _logger = logger;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -44,12 +46,12 @@ public class BotHostedService : IHostedService
 
         var me = await _botClient.GetMeAsync();
 
-        Console.WriteLine($"Start listening for @{me.Username}");
+        _logger.Information("Start listening for {Username}", me.Username);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        Console.WriteLine("Stop");
+        _logger.Information("Stop");
 
         return Task.CompletedTask;
     }
@@ -65,7 +67,8 @@ public class BotHostedService : IHostedService
         var chatId = update.Message.Chat.Id;
         var userId = update.Message.From?.Id;
 
-        Console.WriteLine($"Received a '{messageText}' message in chat {chatId}. UserId: {userId}.");
+        _logger.Information("Received a '{MessageText}' message in chat {ChatId}. UserId: {UserId}.",
+            messageText, chatId, userId);
 
         var validationResults = await Task.WhenAll(_validators.Select(x => x.ValidateAsync(update.Message)));
         if (validationResults.Any(x => x == false))
@@ -80,12 +83,12 @@ public class BotHostedService : IHostedService
     {
         var ErrorMessage = exception switch
         {
-            ApiRequestException apiRequestException
-                => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
+            ApiRequestException apiRequestException => 
+                $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
             _ => exception.ToString()
         };
+        _logger.Error(exception, ErrorMessage);
 
-        Console.WriteLine(ErrorMessage);
         return Task.CompletedTask;
     }
 }

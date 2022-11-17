@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Tm.WcSync.Wc;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using Tm.WcSync.Model.Entities;
 using Tm.WcSync.Sync;
 using System.Linq;
+using Serilog;
 
 namespace Tm.WcSync.Tests
 {
@@ -19,7 +19,7 @@ namespace Tm.WcSync.Tests
         public void NullProductShouldReturnNull()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             // Act
@@ -34,7 +34,7 @@ namespace Tm.WcSync.Tests
         public void InconsistentAvailabilityShouldReturnAny()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             var dbProduct = new DbProduct
@@ -69,7 +69,7 @@ namespace Tm.WcSync.Tests
         public void WrongTypeOfAvailabilityShouldReturnNull()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             var dbProduct = new DbProduct
@@ -109,7 +109,7 @@ namespace Tm.WcSync.Tests
         public void ZeroQuantityShouldReturnNull()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             var dbProduct = new DbProduct
@@ -137,7 +137,7 @@ namespace Tm.WcSync.Tests
         public void AbsentAvailabilityShouldReturnNull()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             var dbProduct = new DbProduct
@@ -157,7 +157,7 @@ namespace Tm.WcSync.Tests
         public void TestCalculationBelowLowerBoundary()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             var dbProduct = new DbProduct
@@ -185,7 +185,7 @@ namespace Tm.WcSync.Tests
         public void TestCalculationAboveLowerBoundary()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             var dbProduct = new DbProduct
@@ -213,7 +213,7 @@ namespace Tm.WcSync.Tests
         public void WrongAvailabilityShouldNotAffectCalculation()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ProductService>>();
+            var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
             var dbProduct = new DbProduct

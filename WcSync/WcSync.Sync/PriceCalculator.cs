@@ -1,5 +1,5 @@
 using System.Linq;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using Tm.WcSync.Model.Entities;
 
 namespace Tm.WcSync.Sync
@@ -12,7 +12,7 @@ namespace Tm.WcSync.Sync
 
         private const decimal _discuontLowerBoundary = 3000m;
 
-        public PriceCalculator(ILogger<ProductService> logger)
+        public PriceCalculator(ILogger logger)
         {
             _logger = logger;
         }
@@ -35,7 +35,8 @@ namespace Tm.WcSync.Sync
             {
                 price = availability.Max(a => a.Price);
                 var prices = availability.Select(a => $"{a.Name}: {a.Price}");
-                _logger.LogInformation($"Prices are not equal in stores for {product.Name} - {product.Id}. {string.Join(", ", prices)}");
+                _logger.Information("Prices are not equal in stores for {ProductName} - {ProductId}. {Prices}.",
+                    product.Name, product.Id, prices);
             }
 
             return (price, price);

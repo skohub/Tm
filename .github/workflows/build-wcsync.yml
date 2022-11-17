@@ -4,12 +4,12 @@ on:
   push:
     branches: [ "master" ]
     paths:
-      - TgBot/**
-      - .github/workflows/build-tgbot.yml
+      - WcSync/**
+      - .github/workflows/build-wcsync.yml
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: tgbot:latest
+  IMAGE_NAME: wcsync:latest
 
 jobs:
   build:
@@ -32,6 +32,6 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: TgBot/Dockerfile
+        file: WcSync/Dockerfile
         push: true
         tags: ${{ env.REGISTRY }}/${{ github.actor }}/${{ env.IMAGE_NAME }}

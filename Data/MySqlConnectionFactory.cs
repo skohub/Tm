@@ -2,6 +2,7 @@
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 
 namespace Data
 {
@@ -12,7 +13,9 @@ namespace Data
         public MySqlConnectionFactory(Dictionary<string, string> connectionStrings) =>
             _connectionStrings = connectionStrings;
 
-        public DbConnection Build(string connectionStringName) =>
-            new MySqlConnection(_connectionStrings[connectionStringName]);
+        public DbConnection Build(string connectionStringName = null) =>
+            connectionStringName is null
+              ? new MySqlConnection(_connectionStrings.Values.First())
+              : new MySqlConnection(_connectionStrings[connectionStringName]);
     }
 }

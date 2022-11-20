@@ -1,8 +1,6 @@
-using WcSync.Model.Entities;
-
-namespace WcSync.Db
+namespace Data.Models.Products
 {
-    public class FlatProductDto
+    public class Product
     {
         public int ProductId { get; set; }
 

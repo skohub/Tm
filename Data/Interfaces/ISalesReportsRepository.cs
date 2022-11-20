@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Data.Models;
+using Data.Models.Sales;
 
 namespace Data.Interfaces
 {

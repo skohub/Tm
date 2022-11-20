@@ -1,8 +1,6 @@
-using Api.Service.Auth;
 using Api.Service.Models;
 using Api.Service.Services;
 using FluentAssertions;
-using Microsoft.Extensions.Configuration;
 
 namespace Api.Tests
 {

@@ -1,13 +1,8 @@
-using System;
 using Moq;
 using NUnit.Framework;
-using WcSync.Wc;
-using WcSync.Db;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using WcSync.Model.Entities;
 using WcSync.Sync;
-using System.Linq;
 using Serilog;
 
 namespace WcSync.Tests

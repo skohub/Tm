@@ -1,8 +1,6 @@
-using WcSync.Model.Entities;
-
-namespace WcSync.Db
+namespace Data.Models.Products
 {
-    public class ItemRestDto
+    public class ItemRest
     {
         public int ItemID { get; set; }
 

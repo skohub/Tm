@@ -1,31 +1,32 @@
 using System;
 using System.Linq;
 using WcSync.Wc;
-using WcSync.Db;
 using System.Threading.Tasks;
 using WcSync.Model;
 using WcSync.Model.Entities;
 using System.Collections.Generic;
 using System.Threading;
 using Serilog;
+using Data.Interfaces;
+using WcSync.Sync.Extensions;
 
 namespace WcSync.Sync
 {
     public class ProductService : IProductService
     {
         private readonly IWcProductService _wcProductService;
-        private readonly IDbProductRepository _dbProductRepository;
+        private readonly IProductsRepository _productsRepository;
         private readonly IPriceCalculator _priceCalculator;
         private readonly ILogger _logger;
 
         public ProductService(
             IWcProductService wcProductService, 
-            IDbProductRepository dbProductRepository,
+            IProductsRepository productsRepository,
             IPriceCalculator priceCalculator,
             ILogger logger)
         {
             _wcProductService = wcProductService;
-            _dbProductRepository = dbProductRepository;
+            _productsRepository = productsRepository;
             _priceCalculator = priceCalculator;
             _logger = logger;
         }
@@ -34,7 +35,8 @@ namespace WcSync.Sync
         {
             try
             {
-                var dbProducts = await _dbProductRepository.GetProductsAsync();
+                var products = await _productsRepository.GetProductsAsync();
+                var dbProducts = products.Map();
                 var wcProducts = await _wcProductService.GetProductsAsync(cancellationToken);
                 var updatedWcProducts = new List<WcProduct>();
 
@@ -75,7 +77,8 @@ namespace WcSync.Sync
 
         public async Task ListProductsDicrepanciesAsync(CancellationToken cancellationToken)
         {
-            var dbProducts = await _dbProductRepository.GetProductsAsync();
+            var products = await _productsRepository.GetProductsAsync();
+            var dbProducts = products.Map();
             var wcProducts = await _wcProductService.GetProductsAsync(cancellationToken);
 
             foreach (var wcProduct in wcProducts.Where(p => p.Availability?.Any() == true))

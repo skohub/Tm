@@ -1,6 +1,6 @@
 ﻿using Api.Service.Auth;
 using Data.Interfaces;
-using Data.Models;
+using Data.Models.ArbitrarySql;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Service.Controllers

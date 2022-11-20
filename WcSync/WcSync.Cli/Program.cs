@@ -1,8 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Data;
+using Data.Interfaces;
+using Data.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using WcSync.Db;
 using WcSync.Model;
 using WcSync.Sync;
 using WcSync.Wc;
@@ -37,10 +41,17 @@ class Program
                 services.GetService<ILogger>(),
                 command))
             .AddTransient<ISyncService, SyncService>()
-            .AddTransient<IWcProductService, WcProductService>()
+            .AddTransient<IWcProductService, WcProductService>(services => 
+            new WcProductService(
+                context.Configuration.GetSection("Wc").Get<WcConfiguration>()!,
+                services.GetService<ILogger>()))
             .AddTransient<IProductService, ProductService>()
             .AddTransient<IPriceCalculator, PriceCalculator>()
-            .AddSingleton<IDbProductRepository, DbProductRepository>();
+            .AddTransient<IProductsRepository, ProductsRepository>()
+            .AddTransient<IConnectionFactory>(services => new MySqlConnectionFactory(
+                context.Configuration
+                    .GetSection("ConnectionStrings")
+                    .Get<Dictionary<string, string>>()));
 
         return services;
     }

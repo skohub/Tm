@@ -9,6 +9,8 @@ using Data.Interfaces;
 using Data.Repositories;
 using TgBot.Services;
 using Serilog;
+using Data;
+using System.Collections.Generic;
 
 namespace TgBot;
 class Program
@@ -33,17 +35,20 @@ class Program
         serviceCollection
             .AddHostedService<BotHostedService>()
             .AddTransient<IBotService, BotService>()
-            .AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(botConfiguration.Token))
-            .AddSingleton<ISalesReportsRepository>(services => 
-                new SalesReportsRepository(context.Configuration.GetConnectionString("mag5")))
-            .AddSingleton<IValidator>(services => 
+            .AddTransient<ITelegramBotClient>(_ => new TelegramBotClient(botConfiguration.Token))
+            .AddTransient<ISalesReportsRepository, SalesReportsRepository>()
+            .AddTransient<IValidator>(services => 
                 new UserValidator(services.GetService<ITelegramBotClient>()!,
                 botConfiguration.AllowedUserIds,
                 services.GetService<ILogger>()!))
             .AddTransient<ICommand, HelpCommand>()
             .AddTransient<ICommand, DailySalesCommand>()
             .AddTransient<ICommand, ProductsTotalAmountCommand>()
-            .AddTransient<ICommand, MonthlySalesCommand>();
+            .AddTransient<ICommand, MonthlySalesCommand>()
+            .AddTransient<IConnectionFactory>(services => new MySqlConnectionFactory(
+                context.Configuration
+                    .GetSection("ConnectionStrings")
+                    .Get<Dictionary<string, string>>()));
 
         return serviceCollection;
     }

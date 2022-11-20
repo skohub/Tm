@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Data.Models;
 using Dapper;
-using MySql.Data.MySqlClient;
 using System.Linq;
 using Data.Interfaces;
 using System.Data;
+using Data.Models.Sales;
 
 namespace Data.Repositories
 {
     public class SalesReportsRepository : ISalesReportsRepository
     {
-        private readonly string _connectionString;
+        private readonly IConnectionFactory _connectionFactory;
 
-        public SalesReportsRepository(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
+        public SalesReportsRepository(IConnectionFactory connectionFactory) =>
+            _connectionFactory = connectionFactory;
 
         public async Task<IList<SalesSummary>> GetSaleSummaries(DateTime date)
         {
@@ -34,7 +31,7 @@ namespace Data.Repositories
                     "and places.organizationid = 1 " +
                 "order by places.number, sales.date";
             
-            using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = _connectionFactory.Build())
             {
                 var items = await connection.QueryAsync<SalesSummary>(sql, new { date });
 
@@ -47,7 +44,7 @@ namespace Data.Repositories
             const string spName = "rest_sum_on_date";
 
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
-            using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = _connectionFactory.Build())
             {
                 var amounts = await connection.QueryAsync<ProductsTotalAmount>(
                     spName, new { _date = date }, commandType: CommandType.StoredProcedure);
@@ -75,7 +72,7 @@ namespace Data.Repositories
                 "group by saled_by " +
                 "order by amount desc";
 
-            using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = _connectionFactory.Build())
             {
                 var query = await connection.QueryAsync(sql, new { startDate, endDate, organizationid });
 

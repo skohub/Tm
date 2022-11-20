@@ -9,7 +9,7 @@ namespace Api.Service
     {
         public static void RegisterServices(this WebApplicationBuilder builder)
         {
-            builder.Services.AddSingleton<IConnectionFactory>(services =>
+            builder.Services.AddTransient<IConnectionFactory>(services =>
                 new MySqlConnectionFactory(builder.Configuration
                     .GetSection("ConnectionStrings")
                     .Get<Dictionary<string, string>>()));

@@ -20,14 +20,14 @@ namespace WcSync.Wc
         private const string _availabilityMetaKey = "product_availability";
         private const string _fixedPriceMetaKey = "fixed_price";
 
-        private readonly IConfiguration _configuration;
+        private readonly WcConfiguration _configuration;
         private readonly ILogger _logger;
         private WCObject _wcObject;
         private int _totalPages;
 
         private WCObject WcClient => _wcObject ?? (_wcObject = Connect());
 
-        public WcProductService(IConfiguration configuration, ILogger logger)
+        public WcProductService(WcConfiguration configuration, ILogger logger)
         {
             _configuration = configuration;
             _logger = logger;
@@ -103,10 +103,10 @@ namespace WcSync.Wc
                 {
                     _logger.Error(e, "Failed to retrieve products page");
                     
-                    await Task.Delay(Consts.FailedRequestDelay, cancellationToken);
+                    await Task.Delay(FailedRequestDelay(), cancellationToken);
                 }
 
-                await Task.Delay(Consts.RequestDelay, cancellationToken);
+                await Task.Delay(RequestDelay(), cancellationToken);
             }
 
             return products
@@ -145,19 +145,32 @@ namespace WcSync.Wc
 
         private void ResponseFilter(HttpWebResponse response)
         {
-            int.TryParse(response.Headers["X-WP-TotalPages"], out _totalPages);
+            if (_configuration.TotalPages is null)
+            {
+                int.TryParse(response.Headers["X-WP-TotalPages"], out _totalPages);
+            }
+            else 
+            {
+                _totalPages = _configuration.TotalPages.Value;
+            }
         }
 
         private WCObject Connect() 
         {
             RestAPI rest = new RestAPI(
-                $"{_configuration["WcHost"]}/wp-json/wc/v3/", 
-                _configuration["WcClient"], 
-                _configuration["WcSecret"],
+                $"{_configuration.Host}/wp-json/wc/v3/", 
+                _configuration.Client, 
+                _configuration.Secret,
                 authorizedHeader: false,
                 responseFilter: ResponseFilter);
 
             return new WCObject(rest);
         }
+
+        private int RequestDelay() =>
+            _configuration.RequestDelay ?? Consts.RequestDelay;
+
+        private int FailedRequestDelay() =>
+            _configuration.FailedRequestDelay ?? Consts.FailedRequestDelay;
     }
 }

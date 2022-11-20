@@ -1,7 +1,8 @@
-﻿using Dapper;
+﻿using System.Linq;
+using Dapper;
 using Data.Interfaces;
 
-namespace Api.Service.Services
+namespace Data
 {
     public class ArbitrarySqlService : IArbitrarySqlService
     {
@@ -12,7 +13,7 @@ namespace Api.Service.Services
             _connectionFactory = connectionFactory;
         }
 
-        public dynamic Select(string connectionStringName, string sql, object? param = null)
+        public dynamic Select(string connectionStringName, string sql, object param = null)
         {
             using (var connection = _connectionFactory.Build(connectionStringName))
             {

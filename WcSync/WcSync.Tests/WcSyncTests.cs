@@ -1,14 +1,14 @@
 ﻿using Moq;
 using NUnit.Framework;
 using WcSync.Wc;
-using WcSync.Db;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WcSync.Model.Entities;
 using WcSync.Sync;
-using System.Linq;
 using System.Threading;
 using Serilog;
+using Data.Interfaces;
+using Data.Models.Products;
 
 namespace WcSync.Tests
 {
@@ -17,9 +17,9 @@ namespace WcSync.Tests
     {
         private ProductService _productService;
         private Mock<IWcProductService> _wcProductServiceMock;
-        private Mock<IDbProductRepository> _dbProductRepositoryMock;
+        private Mock<IProductsRepository> _productsRepositoryMock;
         private WcProduct DefaultWcProduct;
-        private DbProduct DefaultDbProduct;
+        private ItemRest DefaultDbProduct;
 
         [SetUp]
         public void SetUp()
@@ -33,19 +33,14 @@ namespace WcSync.Tests
                 StockStatus = "instock",
             };
 
-            DefaultDbProduct = new DbProduct
+            DefaultDbProduct = new ItemRest
             {
-                Id = 0,
-                Availability = new List<Store>
-                {
-                    new Store
-                    {
-                        Name = "test",
-                        Quantity = 1,
-                        Price = 0,
-                        Type = StoreType.Shop,
-                    }
-                }
+                ItemID = 0,
+                name = "test",
+                i_n = "test",
+                summ = 1,
+                price = 0,
+                StoreType = Data.Models.Products.StoreType.Shop
             };
 
             var cancellationToken = new CancellationToken();
@@ -55,16 +50,16 @@ namespace WcSync.Tests
                 .Setup(m => m.GetProductsAsync(cancellationToken))
                 .Returns(Task.FromResult(new List<WcProduct>{ DefaultWcProduct }));
 
-            _dbProductRepositoryMock = new Mock<IDbProductRepository>();
-            _dbProductRepositoryMock
+            _productsRepositoryMock = new Mock<IProductsRepository>();
+            _productsRepositoryMock
                 .Setup(r => r.GetProductsAsync())
-                .ReturnsAsync(new List<DbProduct>{ DefaultDbProduct });
+                .ReturnsAsync(new List<ItemRest>{ DefaultDbProduct });
 
             var loggerMock = new Mock<ILogger>();
 
             _productService = new ProductService(
                 _wcProductServiceMock.Object,
-                _dbProductRepositoryMock.Object,
+                _productsRepositoryMock.Object,
                 new PriceCalculator(loggerMock.Object),
                 loggerMock.Object);
         }
@@ -84,7 +79,7 @@ namespace WcSync.Tests
         public async Task TestProductUpToDate()
         {
             // Arrange
-            DefaultDbProduct.Availability.First().Price = 10000;
+            DefaultDbProduct.price = 10000;
             DefaultWcProduct.RegularPrice = 10000;
             DefaultWcProduct.SalePrice = 10000;
 
@@ -103,7 +98,7 @@ namespace WcSync.Tests
         public async Task TestUpdateProductCalledWhenPriceDiffers(decimal regularPrice, decimal salePrice)
         {
             // Arrange
-            DefaultDbProduct.Availability.First().Price = 10000;
+            DefaultDbProduct.price = 10000;
             DefaultWcProduct.RegularPrice = regularPrice;
             DefaultWcProduct.SalePrice = salePrice;
 

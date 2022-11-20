@@ -1,9 +1,8 @@
 using System.Security.Claims;
 using Api.Service.Auth;
 using Api.Service.Controllers;
-using Api.Service.Services;
 using Data;
-using Data.Models;
+using Data.Models.ArbitrarySql;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +11,8 @@ using Moq;
 
 namespace Api.Tests.Integration
 {
+    [TestFixture]
+    [Ignore("Integration")]
     public class TestArbitrarySqlController
     {
         private ArbitrarySqlController BuildController(string? connectionStringName)

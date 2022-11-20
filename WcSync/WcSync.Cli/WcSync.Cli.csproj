@@ -18,9 +18,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WcSync.Wc\WcSync.Wc.csproj" />
-    <ProjectReference Include="..\WcSync.Db\WcSync.Db.csproj" />
     <ProjectReference Include="..\WcSync.Model\WcSync.Model.csproj" />
     <ProjectReference Include="..\WcSync.Sync\WcSync.Sync.csproj" />
+    <ProjectReference Include="..\..\Data\Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

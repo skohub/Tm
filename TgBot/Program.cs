@@ -28,7 +28,7 @@ class Program
             .ConfigureServices((context, services) => ConfigureServices(context, services));
 
     public static IServiceCollection ConfigureServices(HostBuilderContext context, IServiceCollection serviceCollection) {
-        var botConfiguration = context.Configuration.GetSection("Configuration").Get<Configuration>();
+        var botConfiguration = context.Configuration.GetSection("Configuration").Get<Configuration>()!;
 
         serviceCollection
             .AddHostedService<BotHostedService>()

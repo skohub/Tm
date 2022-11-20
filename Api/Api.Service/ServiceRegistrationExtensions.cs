@@ -17,7 +17,7 @@ namespace Api.Service
             builder.Services.AddTransient<IUserService>(services =>
                 new UserService(builder.Configuration
                     .GetSection("Users")
-                    .Get<User[]>()));
+                    .Get<User[]>()!));
         }
     }
 }

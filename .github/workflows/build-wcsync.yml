@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: WcSync CI
 
 on:
   push:

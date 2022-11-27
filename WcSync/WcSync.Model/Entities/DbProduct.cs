@@ -5,11 +5,11 @@ namespace WcSync.Model.Entities
 {
     public class DbProduct 
     {
-        public int Id { get; set; }
+        required public int Id { get; init; }
 
-        public string Name { get; set; }
+        required public string Name { get; init; }
 
-        public IList<Store> Availability { get; set; }
+        required public IList<Store> Availability { get; init; }
 
         public string GetStockStatus()
         {

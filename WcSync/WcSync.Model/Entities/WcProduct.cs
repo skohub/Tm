@@ -2,20 +2,20 @@ namespace WcSync.Model.Entities
 {
     public class WcProduct 
     {
-        public ulong Id { get; set; }
+        required public ulong Id { get; init; }
 
-        public string Sku { get; set; }
+        public string? Sku { get; init; }
 
-        public string Name { get; set; }
+        public string? Name { get; init; }
 
-        public string Availability { get; set; }
+        public string? Availability { get; init; }
 
-        public decimal? RegularPrice { get; set; }
+        public decimal? RegularPrice { get; init; }
 
-        public decimal? SalePrice { get; set; }
+        public decimal? SalePrice { get; init; }
 
-        public string StockStatus { get; set; }
+        public string? StockStatus { get; init; }
 
-        public bool FixedPrice { get; set; }
+        public bool FixedPrice { get; init; }
     }
 }

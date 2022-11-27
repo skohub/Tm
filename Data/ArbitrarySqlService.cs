@@ -13,7 +13,7 @@ namespace Data
             _connectionFactory = connectionFactory;
         }
 
-        public dynamic Select(string connectionStringName, string sql, object param = null)
+        public dynamic Select(string connectionStringName, string sql, object? param = null)
         {
             using (var connection = _connectionFactory.Build(connectionStringName))
             {

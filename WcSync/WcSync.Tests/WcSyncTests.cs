@@ -15,62 +15,18 @@ namespace WcSync.Tests
     [TestFixture]
     public class WcSyncTests
     {
-        private ProductService _productService;
-        private Mock<IWcProductService> _wcProductServiceMock;
-        private Mock<IProductsRepository> _productsRepositoryMock;
-        private WcProduct DefaultWcProduct;
-        private ItemRest DefaultDbProduct;
-
-        [SetUp]
-        public void SetUp()
-        {
-            DefaultWcProduct = new WcProduct
-            {
-                Availability = "test",
-                Sku = "0",
-                RegularPrice = 0,
-                SalePrice = 0,
-                StockStatus = "instock",
-            };
-
-            DefaultDbProduct = new ItemRest
-            {
-                ItemID = 0,
-                name = "test",
-                i_n = "test",
-                summ = 1,
-                price = 0,
-                StoreType = Data.Models.Products.StoreType.Shop
-            };
-
-            var cancellationToken = new CancellationToken();
-
-            _wcProductServiceMock = new Mock<IWcProductService>();
-            _wcProductServiceMock
-                .Setup(m => m.GetProductsAsync(cancellationToken))
-                .Returns(Task.FromResult(new List<WcProduct>{ DefaultWcProduct }));
-
-            _productsRepositoryMock = new Mock<IProductsRepository>();
-            _productsRepositoryMock
-                .Setup(r => r.GetProductsAsync())
-                .ReturnsAsync(new List<ItemRest>{ DefaultDbProduct });
-
-            var loggerMock = new Mock<ILogger>();
-
-            _productService = new ProductService(
-                _wcProductServiceMock.Object,
-                _productsRepositoryMock.Object,
-                new PriceCalculator(loggerMock.Object),
-                loggerMock.Object);
-        }
-
         [Test]
         public async Task HappyFlow()
         {
             // Arrange
+            var services = BuildServices(
+                dbProductPrice: 10000,
+                wcProductRegularPrice: 10000,
+                wcProductSalePrice: 10000
+            );
 
             // Act
-            await _productService.UpdateAllProductsAsync(new CancellationToken());
+            await services.ProductService.UpdateAllProductsAsync(new CancellationToken());
 
             // Assert
         }
@@ -79,15 +35,17 @@ namespace WcSync.Tests
         public async Task TestProductUpToDate()
         {
             // Arrange
-            DefaultDbProduct.price = 10000;
-            DefaultWcProduct.RegularPrice = 10000;
-            DefaultWcProduct.SalePrice = 10000;
+            var services = BuildServices(
+                dbProductPrice: 10000,
+                wcProductRegularPrice: 10000,
+                wcProductSalePrice: 10000
+            );
 
             // Act
-            await _productService.UpdateAllProductsAsync(new CancellationToken());
+            await services.ProductService.UpdateAllProductsAsync(new CancellationToken());
 
             // Assert
-            _wcProductServiceMock.Verify(
+            services.WcProductServiceMock.Verify(
                 s => s.UpdateProductsAsync(It.IsAny<List<WcProduct>>()),
                 Times.Never);
         }
@@ -98,17 +56,77 @@ namespace WcSync.Tests
         public async Task TestUpdateProductCalledWhenPriceDiffers(decimal regularPrice, decimal salePrice)
         {
             // Arrange
-            DefaultDbProduct.price = 10000;
-            DefaultWcProduct.RegularPrice = regularPrice;
-            DefaultWcProduct.SalePrice = salePrice;
+            var services = BuildServices(
+                dbProductPrice: 10000,
+                wcProductRegularPrice: regularPrice,
+                wcProductSalePrice: salePrice
+            );
 
             // Act
-            await _productService.UpdateAllProductsAsync(new CancellationToken());
+            await services.ProductService.UpdateAllProductsAsync(new CancellationToken());
 
             // Assert
-            _wcProductServiceMock.Verify(
+            services.WcProductServiceMock.Verify(
                 s => s.UpdateProductsAsync(It.IsAny<List<WcProduct>>()),
                 Times.Once);
+        }
+
+        internal class Services
+        {
+            required public ProductService ProductService;
+            required public Mock<IWcProductService> WcProductServiceMock;
+            required public Mock<IProductsRepository> ProductsRepositoryMock;
+        }
+
+        private Services BuildServices(
+            decimal dbProductPrice, decimal wcProductRegularPrice, decimal wcProductSalePrice)
+        {
+            var wcProduct = new WcProduct
+            {
+                Id = default,
+                Availability = "test",
+                Sku = "0",
+                RegularPrice = wcProductRegularPrice,
+                SalePrice = wcProductSalePrice,
+                StockStatus = "instock",
+            };
+
+            var dbProduct = new Product
+            {
+                ProductId = 0,
+                ProductName = "test",
+                StoreName = "test",
+                StoreType = Data.Models.Products.StoreType.Shop,
+                Quantity = 1,
+                Price = dbProductPrice,
+            };
+
+            var cancellationToken = new CancellationToken();
+
+            var wcProductServiceMock = new Mock<IWcProductService>();
+            wcProductServiceMock
+                .Setup(m => m.GetProductsAsync(cancellationToken))
+                .Returns(Task.FromResult(new List<WcProduct>{ wcProduct }));
+
+            var productsRepositoryMock = new Mock<IProductsRepository>();
+            productsRepositoryMock
+                .Setup(r => r.GetProductsAsync())
+                .ReturnsAsync(new List<Product>{ dbProduct });
+
+            var loggerMock = new Mock<ILogger>();
+
+            var productService = new ProductService(
+                wcProductServiceMock.Object,
+                productsRepositoryMock.Object,
+                new PriceCalculator(loggerMock.Object),
+                loggerMock.Object);
+
+            return new Services
+            {
+                WcProductServiceMock = wcProductServiceMock,
+                ProductsRepositoryMock = productsRepositoryMock,
+                ProductService = productService
+            };
         }
     }
 }

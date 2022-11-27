@@ -2,14 +2,11 @@ namespace Data.Models.Products
 {
     public class Product
     {
-        public int ProductId { get; set; }
-
-        public string ProductName { get; set; }
-
-        public string StoreName { get; set; }
-
-        public StoreType StoreType { get; set; }
-
-        public int Quantity { get; set; }    
+        required public int ProductId { get; init; }
+        required public string ProductName { get; init; }
+        required public string StoreName { get; init; }
+        required public StoreType StoreType { get; init; }
+        required public int Quantity { get; init; }    
+        public decimal Price {get;  init; }
     }
 }

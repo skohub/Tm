@@ -19,7 +19,7 @@ namespace WcSync.Sync
 
         public (decimal? price, decimal? salePrice) GetPrice(DbProduct product)
         {
-            if (product?.Availability?.Any() != true) return (null, null);
+            if (!product.Availability.Any()) return (null, null);
 
             var availability = product.Availability
                 .Where(a => a.Type == StoreType.Shop || a.Type == StoreType.Warehouse)
@@ -27,7 +27,7 @@ namespace WcSync.Sync
                 .Where(a => a.Price > 0)
                 .ToList();
 
-            if (availability.Any() != true) return (null, null);
+            if (!availability.Any()) return (null, null);
 
             var price = decimal.Round(availability.First().Price);
 

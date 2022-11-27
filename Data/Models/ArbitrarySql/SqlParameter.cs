@@ -2,8 +2,8 @@
 {
     public class SqlParameter
     {
-        public string Name { get; set; }
-        public string Value { get; set; }
+        required public string Name { get; init; }
+        required public string Value { get; init; }
         public SqlParameterType Type { get; set; }
     }
 }

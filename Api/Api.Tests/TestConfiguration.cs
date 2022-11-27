@@ -16,7 +16,7 @@ namespace Api.Tests
             // act
             var user = configuration
                 .GetSection("Users")
-                .Get<User[]>()
+                .Get<User[]>()!
                 .First(x => x.Name == userName);
 
             // assert

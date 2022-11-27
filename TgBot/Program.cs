@@ -48,7 +48,7 @@ class Program
             .AddTransient<IConnectionFactory>(services => new MySqlConnectionFactory(
                 context.Configuration
                     .GetSection("ConnectionStrings")
-                    .Get<Dictionary<string, string>>()));
+                    .Get<Dictionary<string, string>>()!));
 
         return serviceCollection;
     }

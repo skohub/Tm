@@ -44,7 +44,7 @@ namespace Api.Tests.Integration
         private Dictionary<string, string> GetConnectionStrings() => Configuration
             .GetConfiguration()
             .GetSection("ConnectionStrings")
-            .Get<Dictionary<string, string>>();
+            .Get<Dictionary<string, string>>()!;
 
         [Test]
         public void TestHappyPath()

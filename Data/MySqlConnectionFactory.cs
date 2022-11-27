@@ -13,7 +13,7 @@ namespace Data
         public MySqlConnectionFactory(Dictionary<string, string> connectionStrings) =>
             _connectionStrings = connectionStrings;
 
-        public DbConnection Build(string connectionStringName = null) =>
+        public DbConnection Build(string? connectionStringName = null) =>
             connectionStringName is null
               ? new MySqlConnection(_connectionStrings.Values.First())
               : new MySqlConnection(_connectionStrings[connectionStringName]);

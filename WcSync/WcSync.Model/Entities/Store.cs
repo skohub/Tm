@@ -2,12 +2,12 @@ namespace WcSync.Model.Entities
 {
     public class Store 
     {
-        public string Name { get; set; }
+        required public string Name { get; init; }
 
-        public int Quantity { get; set; }
+        required public int Quantity { get; init; }
 
-        public decimal Price { get; set; }
+        required public decimal Price { get; init; }
 
-        public StoreType Type { get; set; }
+        required public StoreType Type { get; init; }
     }
 }

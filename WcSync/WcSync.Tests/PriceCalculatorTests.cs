@@ -1,9 +1,9 @@
 using Moq;
 using NUnit.Framework;
-using System.Collections.Generic;
 using WcSync.Model.Entities;
 using WcSync.Sync;
 using Serilog;
+using System.Linq;
 
 namespace WcSync.Tests
 {
@@ -11,14 +11,15 @@ namespace WcSync.Tests
     public class PriceCalculatorTests
     {
         [Test]
-        public void NullProductShouldReturnNull()
+        public void EmptyAvailabilityShouldReturnNull()
         {
             // Arrange
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
+            var product = BuildDbProduct();
 
             // Act
-            (var price, var salePrice) = priceCalculator.GetPrice(null);
+            (var price, var salePrice) = priceCalculator.GetPrice(product);
 
             // Assert
             Assert.IsNull(price);
@@ -31,25 +32,10 @@ namespace WcSync.Tests
             // Arrange
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
-
-            var dbProduct = new DbProduct
-            {
-                Availability = new List<Store>
-                {
-                    new Store
-                    {
-                        Type = StoreType.Shop,
-                        Price = 1000,
-                        Quantity = 1,
-                    },
-                    new Store
-                    {
-                        Type = StoreType.Shop,
-                        Price = 2000,
-                        Quantity = 1,
-                    }
-                }
-            };
+            var dbProduct = BuildDbProduct(
+                (StoreType.Shop, 1000, 1),
+                (StoreType.Shop, 2000, 1)
+            );
 
             // Act
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
@@ -66,31 +52,11 @@ namespace WcSync.Tests
             // Arrange
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
-
-            var dbProduct = new DbProduct
-            {
-                Availability = new List<Store>
-                {
-                    new Store
-                    {
-                        Type = StoreType.ClosedShop,
-                        Price = 1000,
-                        Quantity = 1,
-                    },
-                    new Store
-                    {
-                        Type = StoreType.Inactive,
-                        Price = 1000,
-                        Quantity = 1,
-                    },
-                    new Store
-                    {
-                        Type = StoreType.RepairShop,
-                        Price = 1000,
-                        Quantity = 1,
-                    }
-                }
-            };
+            var dbProduct = BuildDbProduct(
+                (StoreType.ClosedShop, 10000, 1),
+                (StoreType.Inactive, 10000, 1),
+                (StoreType.RepairShop, 10000, 1)
+            );
 
             // Act
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
@@ -106,19 +72,7 @@ namespace WcSync.Tests
             // Arrange
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
-
-            var dbProduct = new DbProduct
-            {
-                Availability = new List<Store>
-                {
-                    new Store
-                    {
-                        Type = StoreType.Shop,
-                        Price = 1000,
-                        Quantity = 0,
-                    }
-                }
-            };
+            var dbProduct = BuildDbProduct((StoreType.Shop, 1000, 0));
 
             // Act
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
@@ -134,11 +88,7 @@ namespace WcSync.Tests
             // Arrange
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
-
-            var dbProduct = new DbProduct
-            {
-                Availability = new List<Store>()
-            };
+            var dbProduct = BuildDbProduct();
 
             // Act
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
@@ -154,19 +104,7 @@ namespace WcSync.Tests
             // Arrange
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
-
-            var dbProduct = new DbProduct
-            {
-                Availability = new List<Store>
-                {
-                    new Store
-                    {
-                        Type = StoreType.Shop,
-                        Price = 1000,
-                        Quantity = 1,
-                    }
-                }
-            };
+            var dbProduct = BuildDbProduct((StoreType.Shop, 1000, 1));
 
             // Act
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
@@ -182,19 +120,7 @@ namespace WcSync.Tests
             // Arrange
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
-
-            var dbProduct = new DbProduct
-            {
-                Availability = new List<Store>
-                {
-                    new Store
-                    {
-                        Type = StoreType.Shop,
-                        Price = 10000,
-                        Quantity = 1,
-                    }
-                }
-            };
+            var dbProduct = BuildDbProduct((StoreType.Shop, 10000, 1));
 
             // Act
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
@@ -211,36 +137,12 @@ namespace WcSync.Tests
             var loggerMock = new Mock<ILogger>();
             var priceCalculator = new PriceCalculator(loggerMock.Object);
 
-            var dbProduct = new DbProduct
-            {
-                Availability = new List<Store>
-                {
-                    new Store
-                    {
-                        Type = StoreType.Shop,
-                        Price = 10000,
-                        Quantity = 1,
-                    },
-                    new Store
-                    {
-                        Type = StoreType.Shop,
-                        Price = 10000,
-                        Quantity = 0,
-                    },
-                    new Store
-                    {
-                        Type = StoreType.ClosedShop,
-                        Price = 10000,
-                        Quantity = 1,
-                    },
-                    new Store
-                    {
-                        Type = StoreType.ClosedShop,
-                        Price = 0,
-                        Quantity = 1,
-                    }
-                }
-            };
+            var dbProduct = BuildDbProduct(
+                (StoreType.Shop, 10000, 1),
+                (StoreType.Shop, 10000, 0),
+                (StoreType.ClosedShop, 10000, 1),
+                (StoreType.ClosedShop, 0, 1)
+            );
 
             // Act
             (var price, var salePrice) = priceCalculator.GetPrice(dbProduct);
@@ -249,5 +151,22 @@ namespace WcSync.Tests
             Assert.AreEqual(10000, price);
             Assert.AreEqual(10000, salePrice);
         }
+
+        private DbProduct BuildDbProduct(params 
+            (StoreType type, decimal price, int quantity)[] availability) =>
+            new DbProduct
+            {
+                Id = 0,
+                Name = "test",
+                Availability = availability
+                    .Select(x => new Store
+                    {
+                        Name = "test",
+                        Type = x.Item1,
+                        Price = x.Item2,
+                        Quantity = x.Item3
+                    })
+                    .ToList()
+            };
     }
 }

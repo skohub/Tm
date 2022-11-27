@@ -22,20 +22,19 @@ namespace WcSync.Wc
 
         private readonly WcConfiguration _configuration;
         private readonly ILogger _logger;
-        private WCObject _wcObject;
+        private WCObject _wcClient;
         private int _totalPages;
-
-        private WCObject WcClient => _wcObject ?? (_wcObject = Connect());
 
         public WcProductService(WcConfiguration configuration, ILogger logger)
         {
             _configuration = configuration;
             _logger = logger;
+            _wcClient = Connect();
         }
 
         public async Task UpdateProductAsync(int productId, string stockStatus, string availability, decimal? regularPrice, decimal? salePrice)
         {
-            await WcClient.Product.Update(productId, new Product
+            await _wcClient.Product.Update(productId, new Product
             {
                 stock_status = stockStatus,
                 regular_price = regularPrice,
@@ -74,7 +73,7 @@ namespace WcSync.Wc
                     .ToList(),
             };
 
-            await WcClient.Product.UpdateRange(batch);
+            await _wcClient.Product.UpdateRange(batch);
         }
 
         public async Task<List<WcProduct>> GetProductsAsync(CancellationToken cancellationToken)
@@ -92,7 +91,7 @@ namespace WcSync.Wc
 
                 try
                 {
-                    products.AddRange(await WcClient.Product.GetAll(new Dictionary<string, string> 
+                    products.AddRange(await _wcClient.Product.GetAll(new Dictionary<string, string> 
                     { 
                         ["page"] = page.ToString(),
                         ["per_page"] = Consts.BatchSize.ToString(),
@@ -110,14 +109,14 @@ namespace WcSync.Wc
             }
 
             return products
-                .Where(p => p.id != null)
-                .Where(p => int.TryParse(p.sku, out _))
+                .Where(product => product.id != null)
+                .Where(Product => int.TryParse(Product.sku, out _))
                 .Select(product => new WcProduct
                 {
-                    Id = product.id.Value,
+                    Id = product.id!.Value,
                     Sku = product.sku,
                     Name = product.name,
-                    Availability = (string) product.meta_data.FirstOrDefault(meta => meta.key == _availabilityMetaKey)?.value,
+                    Availability = (string?) product.meta_data.FirstOrDefault(meta => meta.key == _availabilityMetaKey)?.value,
                     RegularPrice = product.regular_price,
                     SalePrice = product.sale_price,
                     StockStatus = product.stock_status,
@@ -128,14 +127,14 @@ namespace WcSync.Wc
 
         private bool GetFixedPriceProperty(Product product)
         {
-            var value = (string) product.meta_data.FirstOrDefault(meta => meta.key == _fixedPriceMetaKey)?.value;
+            var value = (string?) product.meta_data.FirstOrDefault(meta => meta.key == _fixedPriceMetaKey)?.value;
             
             return bool.TryParse(value, out var result) ? result : false;
         }
 
         private async Task<Product> GetProductBySku(string sku)
         {
-            var products = await WcClient.Product.GetAll(new Dictionary<string, string>
+            var products = await _wcClient.Product.GetAll(new Dictionary<string, string>
             { 
                 { "sku", sku },
             });

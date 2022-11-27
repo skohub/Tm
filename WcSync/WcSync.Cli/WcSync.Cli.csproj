@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <UserSecretsId>fb2c7207-c65b-43fa-877b-b0e720dd0c9e</UserSecretsId>
   </PropertyGroup>
 

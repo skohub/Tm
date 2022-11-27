@@ -24,14 +24,25 @@ namespace Data.Repositories
             return query.ToList();
         }
 
-        public async Task<IList<ItemRest>> GetProductsAsync()
+        public async Task<IList<Product>> GetProductsAsync()
         {
             using var connection = _connectionFactory.Build();
             var query = await connection.QueryAsync<ItemRest>(sql: "call items_rest(0)");
 
             return query
                 .Where(p => p.StoreType == StoreType.Shop || p.StoreType == StoreType.Warehouse)
+                .Select(MapItemRestToProduct)
                 .ToList();
         }
+
+        private Product MapItemRestToProduct(ItemRest itemRest) => new Product
+        {
+            ProductId = itemRest.ItemID,
+            ProductName = itemRest.i_n,
+            StoreName = itemRest.name,
+            StoreType = itemRest.StoreType,
+            Quantity = itemRest.summ,
+            Price = itemRest.price
+        };
     }
 }

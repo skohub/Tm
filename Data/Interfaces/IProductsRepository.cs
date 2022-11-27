@@ -8,6 +8,6 @@ namespace Data.Interfaces
     {
         Task<IList<Product>> GetRecentlyUpdatedProductsAsync();
 
-        Task<IList<ItemRest>> GetProductsAsync();
+        Task<IList<Product>> GetProductsAsync();
     }
 }

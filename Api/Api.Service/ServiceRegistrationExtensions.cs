@@ -12,7 +12,7 @@ namespace Api.Service
             builder.Services.AddTransient<IConnectionFactory>(services =>
                 new MySqlConnectionFactory(builder.Configuration
                     .GetSection("ConnectionStrings")
-                    .Get<Dictionary<string, string>>()));
+                    .Get<Dictionary<string, string>>()!));
             builder.Services.AddTransient<IArbitrarySqlService, ArbitrarySqlService>();
             builder.Services.AddTransient<IUserService>(services =>
                 new UserService(builder.Configuration

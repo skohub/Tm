@@ -19,6 +19,7 @@ public static class DbProductExtensions
                     {
                         Name = p.StoreName,
                         Quantity = p.Quantity,
+                        Price = p.Price,
                         Type = (WcSync.Model.Entities.StoreType) p.StoreType,
                     })
                     .ToList(),

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /source
 
 # copy and build app and libraries
@@ -16,7 +16,7 @@ COPY WcSync/WcSync.Tests/ WcSync/WcSync.Tests/
 RUN dotnet test WcSync/WcSync.Tests/WcSync.Tests.csproj
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:6.0
+FROM mcr.microsoft.com/dotnet/runtime:7.0
 WORKDIR /app
 COPY --from=build /out .
 ENTRYPOINT ["dotnet", "WcSync.Cli.dll"]

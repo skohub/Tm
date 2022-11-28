@@ -31,7 +31,6 @@ public class BotHostedService : BackgroundService
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        CultureInfo.CurrentCulture = new CultureInfo("ru-RU", false);
         var receiverOptions = new ReceiverOptions
         {
             AllowedUpdates = { } // receive all update types

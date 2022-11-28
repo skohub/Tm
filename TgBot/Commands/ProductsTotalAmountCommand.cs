@@ -25,7 +25,7 @@ public class ProductsTotalAmountCommand : ICommand
             date = DateTime.Today;
         }
 
-        var header = $"Остатки товара на {date}";
+        var header = $"Остатки товара на {date:dd.MM.yyyy}";
         var amounts = await _salesReportsRepository.GetProductsTotalAmount(date);
         var lines = amounts.Select(x => $"*{x.Store}:* {x.PurchasingPriceTotal:N0}р.");
 

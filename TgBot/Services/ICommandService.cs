@@ -3,7 +3,7 @@ using Telegram.Bot.Types;
 
 namespace TgBot.Services
 {
-    public interface IBotService
+    public interface ICommandService
     {
         Task HandleMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken);
     }

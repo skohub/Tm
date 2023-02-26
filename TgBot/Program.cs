@@ -4,13 +4,13 @@ using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
 using TgBot.Commands;
 using TgBot.Commands.Common;
+using TgBot.HostedServices;
 using TgBot.Validators;
 using Data.Interfaces;
 using Data.Repositories;
 using TgBot.Services;
 using Serilog;
 using Data;
-using System.Collections.Generic;
 
 namespace TgBot;
 class Program
@@ -30,17 +30,35 @@ class Program
             .ConfigureServices((context, services) => ConfigureServices(context, services));
 
     public static IServiceCollection ConfigureServices(HostBuilderContext context, IServiceCollection serviceCollection) {
-        var botConfiguration = context.Configuration.GetSection("Configuration").Get<Configuration>()!;
+        var configuration = context.Configuration.GetSection("Configuration").Get<Configuration>()!;
 
         serviceCollection
-            .AddHostedService<BotHostedService>()
-            .AddTransient<IBotService, BotService>()
-            .AddTransient<ITelegramBotClient>(_ => new TelegramBotClient(botConfiguration.Token))
+            .AddHostedService<CommandHostedService>()
+            .AddHostedService<NotificationHostedService>(services => 
+                new NotificationHostedService(
+                    logger: services.GetService<ILogger>()!,
+                    messagesRepository: services.GetService<IMessagesRepository>()!,
+                    notificationService: services.GetService<INotificationService>()!,
+                    pollingInterval: configuration.PollingIntervalMilliseconds
+                )
+            )
+            .AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(configuration.Token))
+            .AddTransient<ICommandService, CommandService>()
+            .AddTransient<INotificationService, NotificationService>(services =>
+                new NotificationService(
+                    services.GetService<ITelegramBotClient>()!,
+                    configuration.Subscriptions,
+                    services.GetService<ILogger>()!
+                )
+            )
             .AddTransient<ISalesReportsRepository, SalesReportsRepository>()
+            .AddTransient<IMessagesRepository, MessagesRepository>()
             .AddTransient<IValidator>(services => 
-                new UserValidator(services.GetService<ITelegramBotClient>()!,
-                botConfiguration.AllowedUserIds,
-                services.GetService<ILogger>()!))
+                new UserValidator(
+                    services.GetService<ITelegramBotClient>()!,
+                    configuration.AllowedUserIds,
+                    services.GetService<ILogger>()!
+                ))
             .AddTransient<ICommand, HelpCommand>()
             .AddTransient<ICommand, DailySalesCommand>()
             .AddTransient<ICommand, ProductsTotalAmountCommand>()

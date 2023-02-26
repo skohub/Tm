@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Telegram.Bot;
@@ -9,18 +8,18 @@ using Telegram.Bot.Types.Enums;
 using TgBot.Services;
 using TgBot.Validators;
 
-namespace TgBot;
-public class BotHostedService : BackgroundService
+namespace TgBot.HostedServices;
+public class CommandHostedService : BackgroundService
 {
     private ITelegramBotClient _botClient;
     private IEnumerable<IValidator> _validators;
-    private IBotService _botService;
+    private ICommandService _botService;
     private readonly ILogger _logger;
 
-    public BotHostedService(
+    public CommandHostedService(
         ITelegramBotClient botClient, 
         IEnumerable<IValidator> validators, 
-        IBotService botService,
+        ICommandService botService,
         ILogger logger)
     {
         _botClient = botClient;

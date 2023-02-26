@@ -5,13 +5,13 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TgBot.Commands.Common;
 
 namespace TgBot.Services;
-public class BotService : IBotService
+public class CommandService : ICommandService
 {
     private IEnumerable<ICommand> _commands;
     private IDictionary<long, ICommand> _state = new Dictionary<long, ICommand>();
     private string _defaultCommandName = "/help";
 
-    public BotService(IEnumerable<ICommand> commands) =>
+    public CommandService(IEnumerable<ICommand> commands) =>
         _commands = commands;
 
     public async Task HandleMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)

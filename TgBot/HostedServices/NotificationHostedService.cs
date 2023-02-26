@@ -1,3 +1,4 @@
+using Data.Models.Meessages;
 using Data.Repositories;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -30,7 +31,14 @@ public class NotificationHostedService : BackgroundService
         while (true)
         {
             var messages = await _messagesRepository.GetNewMessagesAsync();
-            await _notificationService.SendAsync(messages);
+            try 
+            {
+                await _notificationService.SendAsync(messages);
+            }
+            finally
+            {
+                await _messagesRepository.SetMessagesStatusAsync(messages, MessageStatus.Complete);
+            }
 
             await Task.Delay(_pollingInterval, stoppingToken);
             stoppingToken.ThrowIfCancellationRequested();

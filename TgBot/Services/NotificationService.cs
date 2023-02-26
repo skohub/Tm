@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.RegularExpressions;
 using Data.Models.Messasges;
 using Serilog;
@@ -25,33 +24,30 @@ public class NotificationService : INotificationService
 
     public async Task SendAsync(IEnumerable<Message> messages)
     {
-        foreach ((var message, var subscriptions) in GetMessagesToSend(messages))
-        {
-            foreach (var subscription in subscriptions)
-            {
-                await _botClient.SendTextMessageAsync(
-                    chatId: subscription.ChatId,
-                    text: PrepareChatMessage(message, subscription),
-                    parseMode: ParseMode.Markdown);
-            }
-        }
+        await Task.WhenAll(messages
+            .SelectMany(x => GetMessageSubscriptions(x).Select(y => (message: x, subscription: y)))
+            .Select(x => SendMessageAsync(x.message, x.subscription)));
     }
 
-    private IEnumerable<(Message, IEnumerable<NotificationSubscription>)> GetMessagesToSend(
-        IEnumerable<Message> messages)
-    {
-        return messages
-            .Select(x => (
-                message: x,
-                subscriptions: _subscriptions
-                    .Where(y => string.Equals(y.Type, x.Type, StringComparison.InvariantCultureIgnoreCase))
-                    .Where(y => Regex.IsMatch(x.User, y.UserPattern))
-            ));
-    }
+    private IEnumerable<NotificationSubscription> GetMessageSubscriptions(Message message) =>
+        _subscriptions
+            .Where(x => string.Equals(x.Type, message.Type, StringComparison.InvariantCultureIgnoreCase))
+            .Where(x => Regex.IsMatch(message.User, x.UserPattern));
 
-    private string PrepareChatMessage(Message message, NotificationSubscription subscription) => 
+    private string PrepareMessageText(Message message, NotificationSubscription subscription) => 
         subscription.NotificationTemplate
             .Replace("@msg", message.Msg)
             .Replace("@user", message.User)
             .Replace("@date", message.Date.ToString("dd.MM.yy HH:mm"));
+
+    private async Task SendMessageAsync(Message message, NotificationSubscription subscription)
+    {
+        var text = PrepareMessageText(message, subscription);
+        await _botClient.SendTextMessageAsync(
+            chatId: subscription.ChatId,
+            text: text,
+            parseMode: ParseMode.Markdown);
+
+        _logger.Information("Sent message {Text} to chat {ChatId}", text, subscription.ChatId);
+    }
 }

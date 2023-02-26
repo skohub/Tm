@@ -53,5 +53,5 @@ public class NotificationService : INotificationService
         subscription.NotificationTemplate
             .Replace("@msg", message.Msg)
             .Replace("@user", message.User)
-            .Replace("@date", message.Date.ToString("dd.MM.yy hh:mm"));
+            .Replace("@date", message.Date.ToString("dd.MM.yy HH:mm"));
 }

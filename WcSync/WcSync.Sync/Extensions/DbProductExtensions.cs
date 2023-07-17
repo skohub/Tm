@@ -25,24 +25,4 @@ public static class DbProductExtensions
                     .ToList(),
             })
         .ToList();
-
-    public static IList<DbProduct> Map(this IEnumerable<ItemRest> products) => products
-        .GroupBy(
-            product => product.ItemID, 
-            product => product,
-            (id, products) => new DbProduct
-            {
-                Id = id,
-                Name = products.First(p => p.ItemID == id).i_n,
-                Availability = products
-                    .Select(p => new Store
-                    {
-                        Name = p.name,
-                        Quantity = p.summ,
-                        Price = p.price,
-                        Type = (WcSync.Model.Entities.StoreType) p.StoreType,
-                    })
-                    .ToList(),
-            })
-        .ToList();
 }

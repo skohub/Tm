@@ -33,19 +33,22 @@ class Program
         HostBuilderContext context,
         IServiceCollection services)
     {
-        var command = args.Length == 1 ? args[0].ToLower() : "update";
         services
             .AddHostedService<HostedService>(services => new HostedService(
                 services.GetService<IHostApplicationLifetime>()!,
                 services.GetService<ISyncService>()!,
-                services.GetService<ILogger>()!,
-                command))
-            .AddTransient<ISyncService, SyncService>()
+                services.GetService<ILogger>()!))
             .AddTransient<IWcProductService, WcProductService>(services => 
             new WcProductService(
                 context.Configuration.GetSection("Wc").Get<WcConfiguration>()!,
                 services.GetService<ILogger>()!))
-            .AddTransient<IProductService, ProductService>()
+            .AddTransient<ISyncService, SyncService>(services => new SyncService(
+                services.GetService<IWcProductService>()!,
+                services.GetService<IProductsRepository>()!,
+                services.GetService<IPriceCalculator>()!,
+                context.Configuration.GetValue<int>(SettingNames.OrganizationId),
+                services.GetService<ILogger>()!
+            ))
             .AddTransient<IPriceCalculator, PriceCalculator>()
             .AddTransient<IProductsRepository, ProductsRepository>()
             .AddTransient<IConnectionFactory>(services => new MySqlConnectionFactory(

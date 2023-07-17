@@ -6,8 +6,6 @@ namespace Data.Interfaces
 {
     public interface IProductsRepository
     {
-        Task<IList<Product>> GetRecentlyUpdatedProductsAsync();
-
-        Task<IList<Product>> GetProductsAsync();
+        Task<IList<Product>> GetProductsAsync(int organizationId);
     }
 }

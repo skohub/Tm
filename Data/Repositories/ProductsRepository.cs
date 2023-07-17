@@ -14,35 +14,16 @@ namespace Data.Repositories
         public ProductsRepository(IConnectionFactory connectionFactory) =>
             _connectionFactory = connectionFactory;
 
-        public async Task<IList<Product>> GetRecentlyUpdatedProductsAsync()
+        public async Task<IList<Product>> GetProductsAsync(int organizationId)
         {
             using var connection = _connectionFactory.Build();
             var query = await connection.QueryAsync<Product>(
-                sql: "call recently_updated_items(?)",
-                param: new { days_offset = 1 });
-
-            return query.ToList();
-        }
-
-        public async Task<IList<Product>> GetProductsAsync()
-        {
-            using var connection = _connectionFactory.Build();
-            var query = await connection.QueryAsync<ItemRest>(sql: "call items_rest(0)");
+                sql: "call items_rest_by_organization(?)",
+                param: new { organizationid = organizationId });
 
             return query
                 .Where(p => p.StoreType == StoreType.Shop || p.StoreType == StoreType.Warehouse)
-                .Select(MapItemRestToProduct)
                 .ToList();
         }
-
-        private Product MapItemRestToProduct(ItemRest itemRest) => new Product
-        {
-            ProductId = itemRest.ItemID,
-            ProductName = itemRest.i_n,
-            StoreName = itemRest.name,
-            StoreType = itemRest.StoreType,
-            Quantity = itemRest.summ,
-            Price = itemRest.price
-        };
     }
 }

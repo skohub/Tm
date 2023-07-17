@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using WooCommerceNET;
 using WooCommerceNET.WooCommerce.v3;
 using Product = WooCommerceNET.WooCommerce.v3.Product;
@@ -32,25 +31,22 @@ namespace WcSync.Wc
             _wcClient = Connect();
         }
 
-        public async Task UpdateProductAsync(int productId, string stockStatus, string availability, decimal? regularPrice, decimal? salePrice)
+        public async Task UpdateProductsAsync(List<WcProduct> products, CancellationToken cancellationToken)
         {
-            await _wcClient.Product.Update(productId, new Product
+            var position = 0;
+            do
             {
-                stock_status = stockStatus,
-                regular_price = regularPrice,
-                sale_price = salePrice,
-                meta_data = new List<ProductMeta>
-                {
-                    new ProductMeta 
-                    {
-                        key = _availabilityMetaKey,
-                        value = availability,
-                    }
-                }
-            });
+                cancellationToken.ThrowIfCancellationRequested();
+                var batch = products.Skip(position).Take(Consts.BatchSize).ToList();
+                _logger.Information("Updating products {Position}-{Total}", position, position + batch.Count);
+                await UpdateProductRange(batch);
+                position += batch.Count;
+                await Task.Delay(Consts.RequestDelay, cancellationToken);
+            }
+            while (position < products.Count);
         }
 
-        public async Task UpdateProductsAsync(List<WcProduct> products)
+        private async Task UpdateProductRange(List<WcProduct> products)
         {
             var batch = new ProductBatch()
             {
@@ -130,16 +126,6 @@ namespace WcSync.Wc
             var value = (string?) product.meta_data.FirstOrDefault(meta => meta.key == _fixedPriceMetaKey)?.value;
             
             return bool.TryParse(value, out var result) ? result : false;
-        }
-
-        private async Task<Product> GetProductBySku(string sku)
-        {
-            var products = await _wcClient.Product.GetAll(new Dictionary<string, string>
-            { 
-                { "sku", sku },
-            });
-
-            return products.FirstOrDefault() ?? throw new Exception($"Product with sku {sku} was not found");
         }
 
         private void ResponseFilter(HttpWebResponse response)

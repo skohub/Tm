@@ -11,18 +11,17 @@ public class HostedService : BackgroundService
     private readonly IHostApplicationLifetime _host;
     private readonly ISyncService _syncService;
     private readonly ILogger _logger;
-    private readonly string _command;
 
     public HostedService(IHostApplicationLifetime host, ISyncService syncService, 
-        ILogger logger, string command) =>
-        (_host, _syncService, _logger, _command) = 
-        (host, syncService, logger, command);
+        ILogger logger) =>
+        (_host, _syncService, _logger) = 
+        (host, syncService, logger);
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            await _syncService.RunAsync(_command, stoppingToken);    
+            await _syncService.UpdateAllProductsAsync(stoppingToken);    
         }
         catch (OperationCanceledException e)
         {

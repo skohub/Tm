@@ -1,30 +1,149 @@
-using System.Threading;
+using System;
+using System.Linq;
+using WcSync.Wc;
 using System.Threading.Tasks;
 using WcSync.Model;
+using WcSync.Model.Entities;
+using System.Collections.Generic;
+using System.Threading;
+using Serilog;
+using Data.Interfaces;
+using WcSync.Sync.Extensions;
 
-namespace WcSync.Sync;
-public class SyncService : ISyncService
+namespace WcSync.Sync
 {
-    private readonly IProductService _productService;
-
-    public SyncService(IProductService productService)
+    public class SyncService : ISyncService
     {
-        _productService = productService;
-    }
+        private readonly IWcProductService _wcProductService;
+        private readonly IProductsRepository _productsRepository;
+        private readonly IPriceCalculator _priceCalculator;
+        private readonly int _organizationId;
+        private readonly ILogger _logger;
 
-    public async Task RunAsync(string command, CancellationToken cancellationToken)
-    {
-        switch (command) 
+        public SyncService(
+            IWcProductService wcProductService, 
+            IProductsRepository productsRepository,
+            IPriceCalculator priceCalculator,
+            int organizationId,
+            ILogger logger)
         {
-            case "list":
-                await _productService.ListProductsDicrepanciesAsync(cancellationToken);
-                break;
-            case "update":
-                await _productService.UpdateAllProductsAsync(cancellationToken);
-                break;
-            default:
-                await _productService.UpdateAllProductsAsync(cancellationToken);
-                break;
+            _wcProductService = wcProductService;
+            _productsRepository = productsRepository;
+            _priceCalculator = priceCalculator;
+            _organizationId = organizationId;
+            _logger = logger;
+        }
+
+        public async Task UpdateAllProductsAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var products = await _productsRepository.GetProductsAsync(_organizationId);
+                var dbProducts = products.Map();
+                var wcProducts = await _wcProductService.GetProductsAsync(cancellationToken);
+                var wcProductsToUpdate = new List<WcProduct>();
+
+                foreach (var wcProduct in wcProducts)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var dbProduct = dbProducts.FirstOrDefault(p => 
+                        int.TryParse(wcProduct.Sku, out int id) && p.Id == id);
+                    if (dbProduct == null) 
+                    {
+                        if (wcProduct.StockStatus != Consts.UnavailableStatus)
+                        {
+                            _logger.Information("Updating product {Name} - {Sku} to \"{Status}\"",
+                                wcProduct.Name, wcProduct.Sku, Consts.UnavailableStatus);
+                            wcProductsToUpdate.Add(SetUnavailableStatus(wcProduct));
+                        }
+
+                        continue;
+                    }
+
+                    if (ProductEquals(wcProduct, dbProduct) == false)
+                    {
+                        wcProductsToUpdate.Add(UpdateProductProperties(wcProduct, dbProduct));
+                    }
+                }
+
+                if (wcProductsToUpdate.Any())
+                {
+                    await _wcProductService.UpdateProductsAsync(wcProductsToUpdate, cancellationToken);
+                    _logger.Information("Updated {Count} products", wcProductsToUpdate.Count);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Something went wrong");
+            }
+        }
+
+        private bool ProductEquals(WcProduct wcProduct, DbProduct dbProduct)
+        {
+            return 
+                wcProduct.StockStatus == dbProduct.GetStockStatus() &&
+                wcProduct.Availability == dbProduct.GetAvailability() &&
+                ProductPriceEquals(wcProduct, dbProduct);
+        }
+
+        private bool ProductPriceEquals(WcProduct wcProduct, DbProduct dbProduct)
+        {
+            if (wcProduct.FixedPrice)
+            {
+                _logger.Information("Product {Name} - {Sku} has fixed price.", wcProduct.Name, wcProduct.Sku);
+
+                return true;
+            }
+
+            (var price, var salePrice) = _priceCalculator.GetPrice(dbProduct);
+
+            if (price == null) return true;
+
+            return 
+                wcProduct.RegularPrice == price && 
+                (wcProduct.SalePrice ?? price) == salePrice;
+        }
+
+        private WcProduct UpdateProductProperties(WcProduct wcProduct, DbProduct dbProduct) 
+        {
+            var stockStatus = dbProduct.GetStockStatus();
+            var availability = dbProduct.GetAvailability();
+            (var price, var salePrice) = _priceCalculator.GetPrice(dbProduct);
+
+            if (wcProduct.FixedPrice)
+            {
+                price = wcProduct.RegularPrice;
+                salePrice = wcProduct.SalePrice;
+            }
+
+            _logger.Information(
+                "Updating product {Name} - {Sku} from {StockStatus} - " +
+                "\"{Availability}\" price: {RegularPrice:F0}/{SalePrice:F0} to " +
+                "{StockStatus} - \"{Availability}\", Price: {Price:F0}/{SalePrice:F0}",
+                wcProduct.Name, wcProduct.Sku, wcProduct.StockStatus, wcProduct.Availability, 
+                wcProduct.RegularPrice, wcProduct.SalePrice, stockStatus, availability, price, salePrice);
+
+            return new WcProduct
+            {
+                Id = wcProduct.Id,
+                StockStatus = stockStatus,
+                Availability = availability,
+                RegularPrice = price,
+                SalePrice = salePrice,
+            }; 
+        }
+
+        private WcProduct SetUnavailableStatus(WcProduct wcProduct)
+        {
+            return new WcProduct
+            {
+                Id = wcProduct.Id,
+                StockStatus = Consts.UnavailableStatus,
+                Availability = string.Empty,
+                RegularPrice = null,
+                SalePrice = null,
+            };
         }
     }
 }

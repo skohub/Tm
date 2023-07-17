@@ -7,8 +7,7 @@ namespace WcSync.Wc
 {
     public interface IWcProductService
     {
-        Task UpdateProductAsync(int productId, string stockStatus, string availability, decimal? regularPrice, decimal? salePrice);
-        Task UpdateProductsAsync(List<WcProduct> products);
+        Task UpdateProductsAsync(List<WcProduct> products, CancellationToken cancellationToken);
         Task<List<WcProduct>> GetProductsAsync(CancellationToken cancellationToken);
     }
 }

@@ -1,8 +1,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WcSync.Model;
-public interface ISyncService
+namespace WcSync.Model
 {
-    Task RunAsync(string command, CancellationToken cancellationToken);
+    public interface ISyncService
+    {
+        Task UpdateAllProductsAsync(CancellationToken cancellationToken);
+    }
 }

@@ -55,6 +55,8 @@ namespace WcSync.Wc
                     {
                         id = x.Id,
                         stock_status = x.StockStatus,
+                        manage_stock = true,
+                        stock_quantity = x.Quantity,
                         regular_price = x.RegularPrice,
                         sale_price = x.SalePrice,
                         meta_data = new List<ProductMeta>
@@ -116,6 +118,7 @@ namespace WcSync.Wc
                     RegularPrice = product.regular_price,
                     SalePrice = product.sale_price,
                     StockStatus = product.stock_status,
+                    Quantity = product.stock_quantity,
                     FixedPrice = GetFixedPriceProperty(product), 
                 })
                 .ToList();

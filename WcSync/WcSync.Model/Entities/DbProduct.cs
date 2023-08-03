@@ -11,14 +11,12 @@ namespace WcSync.Model.Entities
 
         required public IList<Store> Availability { get; init; }
 
-        public string GetStockStatus()
-        {
-            var available = Availability
-                .Where(a => a.Type == StoreType.Shop || a.Type == StoreType.Warehouse)
-                .Any(a => a.Quantity > 0);
+        public int GetQuantity() => Availability
+            .Where(a => a.Type == StoreType.Shop || a.Type == StoreType.Warehouse)
+            .Sum(a => a.Quantity);
 
-            return available ? Consts.AvailableStatus : Consts.UnavailableStatus;
-        }
+        public string GetStockStatus() =>
+            GetQuantity() > 0 ? Consts.AvailableStatus : Consts.UnavailableStatus;
 
         public string GetAvailability()
         {

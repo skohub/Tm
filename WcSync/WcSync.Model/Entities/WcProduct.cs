@@ -17,5 +17,7 @@ namespace WcSync.Model.Entities
         public string? StockStatus { get; init; }
 
         public bool FixedPrice { get; init; }
+
+        public int? Quantity { get; init; }
     }
 }

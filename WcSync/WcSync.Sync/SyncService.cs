@@ -129,6 +129,7 @@ namespace WcSync.Sync
                 Id = wcProduct.Id,
                 StockStatus = stockStatus,
                 Availability = availability,
+                Quantity = dbProduct.GetQuantity(),
                 RegularPrice = price,
                 SalePrice = salePrice,
             }; 

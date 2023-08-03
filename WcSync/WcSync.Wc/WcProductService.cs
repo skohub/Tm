@@ -58,7 +58,6 @@ namespace WcSync.Wc
                         manage_stock = true,
                         stock_quantity = x.Quantity,
                         regular_price = x.RegularPrice,
-                        sale_price = x.SalePrice,
                         meta_data = new List<ProductMeta>
                         {
                             new ProductMeta 

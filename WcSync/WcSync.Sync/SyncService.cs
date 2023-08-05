@@ -47,14 +47,17 @@ namespace WcSync.Sync
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var dbProduct = dbProducts.FirstOrDefault(p => 
-                        int.TryParse(wcProduct.Sku, out int id) && p.Id == id);
+                    if (!int.TryParse(wcProduct.Sku, out int productId))
+                    {
+                        _logger.Warning("Invalid Sku {@WcProduct}", wcProduct);
+                        continue;
+                    }
+
+                    var dbProduct = dbProducts.FirstOrDefault(p => p.Id == productId);
                     if (dbProduct == null) 
                     {
-                        if (wcProduct.StockStatus != Consts.UnavailableStatus)
+                        if (wcProduct.Quantity > 0 || wcProduct.StockStatus != Consts.UnavailableStatus)
                         {
-                            _logger.Information("Updating product {Name} - {Sku} to \"{Status}\"",
-                                wcProduct.Name, wcProduct.Sku, Consts.UnavailableStatus);
                             wcProductsToUpdate.Add(SetUnavailableStatus(wcProduct));
                         }
 
@@ -137,11 +140,14 @@ namespace WcSync.Sync
 
         private WcProduct SetUnavailableStatus(WcProduct wcProduct)
         {
+            _logger.Information("Updating product {Name} - {Sku} to \"{Status}\"",
+                wcProduct.Name, wcProduct.Sku, Consts.UnavailableStatus);
             return new WcProduct
             {
                 Id = wcProduct.Id,
                 StockStatus = Consts.UnavailableStatus,
                 Availability = string.Empty,
+                Quantity = 0,
                 RegularPrice = null,
                 SalePrice = null,
             };
